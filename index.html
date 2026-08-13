@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Óptica Carlani - Visagismo Pro IA</title>
+    <title>Óptica Carlani - Visagismo Profesional</title>
     
     <!-- Librerías de IA Facial de Google MediaPipe -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
@@ -177,7 +177,7 @@
 
         .product-card svg {
             width: 100%;
-            height: 70px;
+            height: 65px;
             margin-bottom: 5px;
         }
 
@@ -199,7 +199,7 @@
 <body>
 
     <h1>ÓPTICA CARLANI</h1>
-    <div class="subtitle">Visagismo de Precisión IA - 6 Tipologías Facial</div>
+    <div class="subtitle">Guía de Visagismo & Elección de Armazón</div>
 
     <!-- SELECTOR DE GÉNERO -->
     <div class="gender-selector">
@@ -214,13 +214,13 @@
     </div>
 
     <!-- BOTÓN DE DIAGNÓSTICO -->
-    <button class="btn-analizar" onclick="ejecutarAnalisisIA()">✨ ESCANEAR Y DIAGNOSTICAR ROSTRO</button>
+    <button class="btn-analizar" onclick="ejecutarAnalisisIA()">✨ DIAGNOSTICAR ARMAZÓN IDEAL</button>
 
     <!-- ÁREA DE RESULTADOS -->
     <div id="result-container">
         <div id="result-header">
-            <div style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">Diagnóstico de Visagismo Carlani</div>
-            <div id="face-shape" class="badge-result">Calculando...</div>
+            <div style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">Diagnóstico Personalizado Carlani</div>
+            <div id="face-shape" class="badge-result">Escaneando...</div>
             <div id="skin-tone" style="font-size: 13px; color: #fff; margin-top: 4px;">---</div>
         </div>
         
@@ -228,7 +228,7 @@
             <div class="section-title">🎨 Paleta de Colores Recomendada</div>
             <div id="color-reco-text">---</div>
 
-            <div class="section-title">👓 Monturas Exclusivas Recomendadas</div>
+            <div class="section-title">👓 Diseños de Armazón Ideales</div>
             <div id="catalog-container" class="catalog-grid"></div>
         </div>
     </div>
@@ -252,113 +252,125 @@
             document.getElementById('btn-mujer').classList.toggle('active', gender === 'mujer');
         }
 
-        const SVG_GAFAS = {
-            cuadrada_negra: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><path d="M20 20 H80 V60 H20 Z M120 20 H180 V60 H120 Z M80 35 H120" stroke="#111" stroke-width="6" fill="none" rx="5"/><line x1="0" y1="30" x2="20" y2="30" stroke="#111" stroke-width="5"/><line x1="180" y1="30" x2="200" y2="30" stroke="#111" stroke-width="5"/></svg>`,
-            aviador_metal: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><path d="M25 20 C50 15, 75 20, 75 40 C75 62, 45 65, 25 55 C15 45, 15 25, 25 20 Z" stroke="#C5A059" stroke-width="4" fill="none"/><path d="M175 20 C150 15, 125 20, 125 40 C125 62, 155 65, 175 55 C185 45, 185 25, 175 20 Z" stroke="#C5A059" stroke-width="4" fill="none"/><line x1="75" y1="25" x2="125" y2="25" stroke="#C5A059" stroke-width="3"/><line x1="75" y1="32" x2="125" y2="32" stroke="#C5A059" stroke-width="3"/></svg>`,
-            cateye_femenina: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><path d="M15 15 Q55 25 75 45 Q45 65 20 50 Z" stroke="#111" stroke-width="5" fill="none"/><path d="M185 15 Q145 25 125 45 Q155 65 180 50 Z" stroke="#111" stroke-width="5" fill="none"/><line x1="75" y1="35" x2="125" y2="35" stroke="#111" stroke-width="4"/></svg>`,
-            redonda_dorada: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="40" r="25" stroke="#C5A059" stroke-width="4" fill="none"/><circle cx="150" cy="40" r="25" stroke="#C5A059" stroke-width="4" fill="none"/><line x1="75" y1="40" x2="125" y2="40" stroke="#C5A059" stroke-width="3"/></svg>`
+        // VECTORES SVG VECTORIALES EXACTOS A TU GUÍA VISUAL
+        const SVG_DESIGNS = {
+            agatadas: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><path d="M15 15 Q55 25 75 45 Q45 65 20 50 Z" stroke="#111" stroke-width="5" fill="none"/><path d="M185 15 Q145 25 125 45 Q155 65 180 50 Z" stroke="#111" stroke-width="5" fill="none"/><line x1="75" y1="35" x2="125" y2="35" stroke="#111" stroke-width="4"/></svg>`,
+            redondas: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="40" r="25" stroke="#C5A059" stroke-width="4" fill="none"/><circle cx="150" cy="40" r="25" stroke="#C5A059" stroke-width="4" fill="none"/><line x1="75" y1="40" x2="125" y2="40" stroke="#C5A059" stroke-width="3"/></svg>`,
+            cuadradas: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><path d="M20 20 H80 V60 H20 Z M120 20 H180 V60 H120 Z M80 35 H120" stroke="#111" stroke-width="6" fill="none" rx="5"/><line x1="0" y1="30" x2="20" y2="30" stroke="#111" stroke-width="5"/><line x1="180" y1="30" x2="200" y2="30" stroke="#111" stroke-width="5"/></svg>`,
+            aviador: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><path d="M25 20 C50 15, 75 20, 75 40 C75 62, 45 65, 25 55 C15 45, 15 25, 25 20 Z" stroke="#C5A059" stroke-width="4" fill="none"/><path d="M175 20 C150 15, 125 20, 125 40 C125 62, 155 65, 175 55 C185 45, 185 25, 175 20 Z" stroke="#C5A059" stroke-width="4" fill="none"/><line x1="75" y1="25" x2="125" y2="25" stroke="#C5A059" stroke-width="3"/><line x1="75" y1="32" x2="125" y2="32" stroke="#C5A059" stroke-width="3"/></svg>`,
+            rectangulares: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="25" width="70" height="30" rx="4" stroke="#111" stroke-width="5" fill="none"/><rect x="115" y="25" width="70" height="30" rx="4" stroke="#111" stroke-width="5" fill="none"/><line x1="85" y1="38" x2="115" y2="38" stroke="#111" stroke-width="4"/></svg>`,
+            mariposa: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><path d="M15 15 Q80 20 75 45 Q40 70 20 50 Z" stroke="#111" stroke-width="5" fill="none"/><path d="M185 15 Q120 20 125 45 Q160 70 180 50 Z" stroke="#111" stroke-width="5" fill="none"/><line x1="75" y1="35" x2="125" y2="35" stroke="#111" stroke-width="4"/></svg>`,
+            ovaladas: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="40" rx="30" ry="20" stroke="#C5A059" stroke-width="4" fill="none"/><ellipse cx="150" cy="40" rx="30" ry="20" stroke="#C5A059" stroke-width="4" fill="none"/><line x1="80" y1="40" x2="120" y2="40" stroke="#C5A059" stroke-width="3"/></svg>`
         };
 
-        // BASE DE DATOS DE LOS 6 TIPOS DE ROSTRO SEGREGADA POR GÉNERO
-        const RECOMENDACIONES_BASE = {
-            "OVALADO": {
-                desc: "Tienes una simetría armónica ideal. El objetivo es mantener el equilibrio natural.",
+        // ESTRUCTURA TAL CUAL TU GUÍA FOTOGRÁFICA
+        const GUIA_VISAGISMO = {
+            "OVALADA": {
+                desc: "Equilibrio armónico natural. Admite gran variedad de formas de armazón.",
                 hombre: {
                     tone: "Piel Neutra / Cálida",
                     colors: "<b>Colores masculinos idóneos:</b> Negro Mate, Carey Oscuro, Gunmetal y Azul Noche.",
                     products: [
-                        { name: "Carlani Wayfarer Matte", style: "Negro Mate / Acetato", svg: SVG_GAFAS.cuadrada_negra },
-                        { name: "Executive Aviator", style: "Gunmetal Metálico", svg: SVG_GAFAS.aviador_metal }
+                        { name: "Armazón Cuadrado Bold", style: "Estilo Cuadradas", svg: SVG_DESIGNS.cuadradas },
+                        { name: "Armazón Aviador Premium", style: "Estilo Aviador Metálico", svg: SVG_DESIGNS.aviador },
+                        { name: "Armazón Redondo Slim", style: "Estilo Redondas", svg: SVG_DESIGNS.redondas }
                     ]
                 },
                 mujer: {
                     tone: "Piel Cálida / Dorada",
                     colors: "<b>Colores femeninos idóneos:</b> Carey Dorado, Marrón Nude, Beige y Verde Oliva.",
                     products: [
-                        { name: "Vogue Cat-Eye Gold", style: "Ojo de Gato Fino", svg: SVG_GAFAS.cateye_femenina },
-                        { name: "Carlani Circle Nude", style: "Dorado Satinado", svg: SVG_GAFAS.redonda_dorada }
+                        { name: "Armazón Agatado Vogue", style: "Estilo Agatadas / Cat-Eye", svg: SVG_DESIGNS.agatadas },
+                        { name: "Armazón Redondo Pastel", style: "Estilo Redondas", svg: SVG_DESIGNS.redondas },
+                        { name: "Armazón Cuadrado Chic", style: "Estilo Cuadradas", svg: SVG_DESIGNS.cuadradas },
+                        { name: "Armazón Aviador Classic", style: "Estilo Aviador", svg: SVG_DESIGNS.aviador }
                     ]
                 }
             },
-            "REDONDO": {
-                desc: "Buscamos estructuras con ángulos marcados para estilizar y contrastar las líneas curvas del rostro.",
+            "REDONDA": {
+                desc: "Buscamos ángulos, cortes agudos y geometrías para alargar y estilizar el rostro.",
                 hombre: {
                     tone: "Piel Fría / Clara",
                     colors: "<b>Colores masculinos idóneos:</b> Negro Azabache, Plata Pulido, Titanio y Azul Marino.",
                     products: [
-                        { name: "Square Bold Black", style: "Rectangular Acetato Genuino", svg: SVG_GAFAS.cuadrada_negra },
-                        { name: "Carlani Aviator Angular", style: "Metálico Plata", svg: SVG_GAFAS.aviador_metal }
+                        { name: "Armazón Cuadrado Marcado", style: "Estilo Cuadradas", svg: SVG_DESIGNS.cuadradas },
+                        { name: "Armazón Rectangular Slim", style: "Estilo Rectangulares", svg: SVG_DESIGNS.rectangulares }
                     ]
                 },
                 mujer: {
                     tone: "Piel Fría / Clara",
                     colors: "<b>Colores femeninos idóneos:</b> Negro Intenso, Plata, Cristal Transparente y Borgoña.",
                     products: [
-                        { name: "Cat-Eye Angular Vogue", style: "Elevado Negro Acetato", svg: SVG_GAFAS.cateye_femenina },
-                        { name: "Geometric Slim Silver", style: "Plata Fina", svg: SVG_GAFAS.redonda_dorada }
-                    ]
-                }
-            },
-            "CUADRADO": {
-                desc: "Buscamos suavizar la mandíbula angular mediante monturas redondeadas u ovaladas de líneas suaves.",
-                hombre: {
-                    tone: "Piel Cálida / Morena",
-                    colors: "<b>Colores masculinos idóneos:</b> Carey Marrón Oscuro, Dorado Antiguo y Bronce.",
-                    products: [
-                        { name: "Classic Round Metal", style: "Redonda Dorada / Bronce", svg: SVG_GAFAS.redonda_dorada },
-                        { name: "Aviator Curve Platinum", style: "Aviador Suave Metálico", svg: SVG_GAFAS.aviador_metal }
-                    ]
-                },
-                mujer: {
-                    tone: "Piel Neutra",
-                    colors: "<b>Colores femeninos idóneos:</b> Nude Suave, Rosa Palo, Dorado Satinado y Carey Claro.",
-                    products: [
-                        { name: "Oval Rose Gold", style: "Curva Suave Dorada", svg: SVG_GAFAS.redonda_dorada },
-                        { name: "Cat-Eye Soft Curve", style: "Mariposa Suave Nude", svg: SVG_GAFAS.cateye_femenina }
-                    ]
-                }
-            },
-            "RECTANGULAR": {
-                desc: "Tienes ángulos definidos y una estructura alargada. Buscamos monturas altas o redondas que acorten visualmente el rostro.",
-                hombre: {
-                    tone: "Piel Neutra / Calida",
-                    colors: "<b>Colores masculinos idóneos:</b> Carey Oscuro, Negro Satinado, Gris Plomo y Bronce.",
-                    products: [
-                        { name: "Carlani Round Deep", style: "Redonda de Acetato Oscuro", svg: SVG_GAFAS.redonda_dorada },
-                        { name: "Aviator Classic Gold", style: "Aviador Grande Metálico", svg: SVG_GAFAS.aviador_metal }
-                    ]
-                },
-                mujer: {
-                    tone: "Piel Fría / Clara",
-                    colors: "<b>Colores femeninos idóneos:</b> Borgoña, Carey Cálido, Dorado Satinado y Miel.",
-                    products: [
-                        { name: "Oversized Round Vogue", style: "Redonda de Acetato Grande", svg: SVG_GAFAS.redonda_dorada },
-                        { name: "Cat-Eye Wide Style", style: "Ojo de Gato de Lente Ancha", svg: SVG_GAFAS.cateye_femenina }
+                        { name: "Armazón Agatado Estilizado", style: "Estilo Agatadas", svg: SVG_DESIGNS.agatadas },
+                        { name: "Armazón Cuadrado Bicolor", style: "Estilo Cuadradas", svg: SVG_DESIGNS.cuadradas },
+                        { name: "Armazón Rectangular Chic", style: "Estilo Rectangulares", svg: SVG_DESIGNS.rectangulares },
+                        { name: "Armazón Mariposa Glam", style: "Estilo Mariposa", svg: SVG_DESIGNS.mariposa }
                     ]
                 }
             },
             "CORAZÓN": {
-                desc: "Frente o pómulos anchos con mentón afinado. Buscamos equilibrar la parte inferior con monturas de marco fino o al aire.",
+                desc: "Frente o pómulos anchos con mentón afinado. Buscamos balance en la parte inferior.",
                 hombre: {
                     tone: "Piel Clara / Neutra",
                     colors: "<b>Colores masculinos idóneos:</b> Plata Satinado, Titanio Transparente, Azul Claro y Gris Metal.",
                     products: [
-                        { name: "Slim Round Silver", style: "Metálica Redonda Plata", svg: SVG_GAFAS.redonda_dorada },
-                        { name: "Wayfarer Soft Edges", style: "Acetato Delgado Transparente", svg: SVG_GAFAS.cuadrada_negra }
+                        { name: "Armazón Aviador Dual", style: "Estilo Aviador", svg: SVG_DESIGNS.aviador },
+                        { name: "Armazón Rectangular Light", style: "Estilo Rectangulares", svg: SVG_DESIGNS.rectangulares }
                     ]
                 },
                 mujer: {
                     tone: "Piel Cálida / Dorada",
                     colors: "<b>Colores femeninos idóneos:</b> Cristal Transparente, Rosa Palo, Dorado Fino y Celeste.",
                     products: [
-                        { name: "Soft Cat-Eye Crystal", style: "Transparente / Dorado Fino", svg: SVG_GAFAS.cateye_femenina },
-                        { name: "Circle Light Gold", style: "Metálica Ligera Dorada", svg: SVG_GAFAS.redonda_dorada }
+                        { name: "Armazón Aviador Femenino", style: "Estilo Aviador", svg: SVG_DESIGNS.aviador },
+                        { name: "Armazón Rectangular Tortoise", style: "Estilo Rectangulares", svg: SVG_DESIGNS.rectangulares },
+                        { name: "Armazón Mariposa Elegance", style: "Estilo Mariposa", svg: SVG_DESIGNS.mariposa }
+                    ]
+                }
+            },
+            "DIAMANTE": {
+                desc: "Pómulos prominentes con frente y mentón estrechos. Buscamos suavizar la zona media.",
+                hombre: {
+                    tone: "Piel Neutra",
+                    colors: "<b>Colores masculinos idóneos:</b> Gunmetal, Negro Mate, Bronce y Carey Oscuro.",
+                    products: [
+                        { name: "Armazón Ovalado Executive", style: "Estilo Ovaladas", svg: SVG_DESIGNS.ovaladas },
+                        { name: "Armazón Redondo Classic", style: "Estilo Redondas", svg: SVG_DESIGNS.redondas }
+                    ]
+                },
+                mujer: {
+                    tone: "Piel Cálida / Nude",
+                    colors: "<b>Colores femeninos idóneos:</b> Dorado, Ámbar, Nude Suave y Negro Brillante.",
+                    products: [
+                        { name: "Armazón Ovalado Amber", style: "Estilo Ovaladas", svg: SVG_DESIGNS.ovaladas },
+                        { name: "Armazón Redondo Deep", style: "Estilo Redondas", svg: SVG_DESIGNS.redondas },
+                        { name: "Armazón Agatado Sharp", style: "Estilo Agatadas", svg: SVG_DESIGNS.agatadas }
+                    ]
+                }
+            },
+            "CUADRADA": {
+                desc: "Mandíbula y frente marcadas. Buscamos suavizar facciones mediante curvas y estilos agudos.",
+                hombre: {
+                    tone: "Piel Cálida / Morena",
+                    colors: "<b>Colores masculinos idóneos:</b> Carey Marrón Oscuro, Dorado Antiguo y Bronce.",
+                    products: [
+                        { name: "Armazón Redondo Gold", style: "Estilo Redondas", svg: SVG_DESIGNS.redondas },
+                        { name: "Armazón Ovalado Curve", style: "Estilo Ovaladas", svg: SVG_DESIGNS.ovaladas }
+                    ]
+                },
+                mujer: {
+                    tone: "Piel Neutra",
+                    colors: "<b>Colores femeninos idóneos:</b> Nude Suave, Rosa Palo, Dorado Satinado y Carey Claro.",
+                    products: [
+                        { name: "Armazón Redondo Thin", style: "Estilo Redondas", svg: SVG_DESIGNS.redondas },
+                        { name: "Armazón Ovalado Soft", style: "Estilo Ovaladas", svg: SVG_DESIGNS.ovaladas },
+                        { name: "Armazón Cat-Eye Bold", style: "Estilo Cat-Eye / Agatadas", svg: SVG_DESIGNS.agatadas }
                     ]
                 }
             }
         };
 
-        // CONFIGURACIÓN MEDIAPIPE FACE MESH
+        // CONFIGURACIÓN DE IA MEDIAPIPE FACE MESH
         const faceMesh = new FaceMesh({
             locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
         });
@@ -381,7 +393,6 @@
             if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                 currentLandmarks = results.multiFaceLandmarks[0];
 
-                // Dibujar puntos de escáner facial en vivo
                 canvasCtx.fillStyle = '#C5A059';
                 const keyIndices = [10, 152, 234, 454, 136, 365, 103, 332];
                 for (const idx of keyIndices) {
@@ -408,55 +419,51 @@
 
         camera.start();
 
-        // ALGORITMO CIENTÍFICO DE VISAGISMO PARA 5 TIPOLOGÍAS
-        function calcularFormaExactaIA() {
-            if (!currentLandmarks) return "OVALADO";
+        // ALGORITMO DE DETECCIÓN EXACTO BASADO EN TU GUÍA FOTOGRÁFICA
+        function calcularFormaGuiadaIA() {
+            if (!currentLandmarks) return "OVALADA";
 
-            // Puntos Clave de Control Anatómico:
-            const top = currentLandmarks[10];        // Frente superior
-            const bottom = currentLandmarks[152];    // Mentón
-            const leftCheek = currentLandmarks[234];  // Pómulo izq
-            const rightCheek = currentLandmarks[454]; // Pómulo der
-            const leftJaw = currentLandmarks[136];    // Mandíbula izq
-            const rightJaw = currentLandmarks[365];   // Mandíbula der
-            const leftForehead = currentLandmarks[103]; // Frente izq
-            const rightForehead = currentLandmarks[332];// Frente der
+            const top = currentLandmarks[10];        
+            const bottom = currentLandmarks[152];    
+            const leftCheek = currentLandmarks[234];  
+            const rightCheek = currentLandmarks[454]; 
+            const leftJaw = currentLandmarks[136];    
+            const rightJaw = currentLandmarks[365];   
+            const leftForehead = currentLandmarks[103]; 
+            const rightForehead = currentLandmarks[332];
 
-            // Distancias calculadas
             const largoRostro = Math.hypot(top.x - bottom.x, top.y - bottom.y);
             const anchoPomulos = Math.hypot(leftCheek.x - rightCheek.x, leftCheek.y - rightCheek.y);
             const anchoMandibula = Math.hypot(leftJaw.x - rightJaw.x, leftJaw.y - rightJaw.y);
             const anchoFrente = Math.hypot(leftForehead.x - rightForehead.x, leftForehead.y - rightForehead.y);
 
-            // Proporciones Críticas
             const ratioLargoAncho = largoRostro / anchoPomulos;
             const ratioMandibulaPomulos = anchoMandibula / anchoPomulos;
             const ratioMentonFrente = anchoMandibula / anchoFrente;
 
-            // MATRIZ DE DECISIÓN MATEMÁTICA REAL:
+            // REGISTRO DE CLASIFICACIÓN RIGUROSO:
+            // 1. CARA EN FORMA DE DIAMANTE: Pómulos marcadamente más anchos que la frente y el mentón
+            if (anchoPomulos > anchoFrente * 1.15 && ratioMandibulaPomulos < 0.75) {
+                return "DIAMANTE";
+            }
 
-            // 1. ROSTRO CORAZÓN: Frente/Pómulos anchos y mandíbula marcadamente más fina (< 0.72)
-            if (ratioMentonFrente < 0.72 && ratioMandibulaPomulos < 0.76) {
+            // 2. CARA EN FORMA DE CORAZÓN: Frente amplia y mentón marcadamente afilado
+            if (ratioMentonFrente < 0.73 && ratioMandibulaPomulos < 0.77) {
                 return "CORAZÓN";
             }
 
-            // 2. ROSTROS CON ÁNGULOS MANDIBULARES MARCADOS (> 0.85):
-            if (ratioMandibulaPomulos > 0.85) {
-                // Si además es marcadamente alargado (> 1.32) -> RECTANGULAR
-                if (ratioLargoAncho > 1.32) {
-                    return "RECTANGULAR";
-                }
-                // Si es compacto (< 1.32) -> CUADRADO
-                return "CUADRADO";
+            // 3. CARAS CUADRADAS: Mandíbula ancha y angular igual a pómulos
+            if (ratioMandibulaPomulos > 0.86) {
+                return "CUADRADA";
             }
 
-            // 3. ROSTRO REDONDO: Sin ángulos marcados y de estructura corta/compacta (< 1.22)
+            // 4. CARAS REDONDAS: Proporciones cortas y curvas (Ratio largo/ancho compacto < 1.22)
             if (ratioLargoAncho < 1.22) {
-                return "REDONDO";
+                return "REDONDA";
             }
 
-            // 4. ROSTRO OVALADO: Estructura alargada (> 1.22) con mentón y mandíbula suaves
-            return "OVALADO";
+            // 5. CARAS OVALADAS: Rostro proporcionalmente alargado (> 1.22) y mentón suave
+            return "OVALADA";
         }
 
         function ejecutarAnalisisIA() {
@@ -469,11 +476,11 @@
             faceShapeText.innerText = "Calculando proporciones...";
 
             setTimeout(() => {
-                const shapeResult = calcularFormaExactaIA();
-                const baseData = RECOMENDACIONES_BASE[shapeResult];
+                const shapeResult = calcularFormaGuiadaIA();
+                const baseData = GUIA_VISAGISMO[shapeResult];
                 const genderData = selectedGender === 'hombre' ? baseData.hombre : baseData.mujer;
 
-                faceShapeText.innerText = `ROSTRO ${shapeResult}`;
+                faceShapeText.innerText = `CARA ${shapeResult}`;
                 skinToneText.innerText = `Tono: ${genderData.tone}`;
                 colorRecoText.innerHTML = `<div>${baseData.desc}</div><div style="margin-top:5px;">${genderData.colors}</div>`;
 
