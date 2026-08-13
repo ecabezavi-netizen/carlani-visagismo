@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Óptica Carlani - Visagismo IA</title>
+    
+    <!-- Carga de librerías en orden correcto -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    
+    <style>
+        :root {
+            --color-nude: #F5F0ED;
+            --color-dorado: #C5A059;
+            --color-negro: #000000;
+            --color-blanco: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--color-nude);
+            color: var(--color-negro);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--color-dorado);
+            font-weight: 300;
+            margin: 0;
+            letter-spacing: 2px;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #container {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            height: 360px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+            border: 3px solid var(--color-negro);
+        }
+
+        #webcam {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: scaleX(-1);
+        }
+
+        #face-guide {
+            position: absolute;
+            top: 10%; left: 20%; width: 60%; height: 80%;
+            border: 2px dashed var(--color-dorado);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        #result-container {
+            margin-top: 15px;
+            width: 100%;
+            max-width: 480px;
+            background: var(--color-blanco);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        #result-header {
+            background-color: var(--color-negro);
+            color: var(--color-blanco);
+            padding: 12px;
+            text-align: center;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        #face-shape {
+            font-size: 24px;
+            color: var(--color-dorado);
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        #result-body {
+            padding: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .reco-title {
+            color: var(--color-dorado);
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            font-size: 13px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 3px;
+        }
+
+        #loading-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .btn-retry {
+            margin-top: 15px;
+            background: var(--color-dorado);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ÓPTICA CARLANI</h1>
+    <div class="subtitle">Visagismo e Inteligencia Artificial</div>
+
+    <div id="container">
+        <video id="webcam" autoplay playsinline muted></video>
+        <canvas id="overlay"></canvas>
+        <div id="face-guide"></div>
+        
+        <div id="loading-overlay">
+            <h3 style="color: var(--color-dorado); margin: 0 0 10px 0;">ÓPTICA CARLANI</h3>
+            <div id="status-text">Iniciando cámara y modelo de visión...</div>
+            <button id="retry-btn" class="btn-retry" style="display:none;" onclick="location.reload()">Reintentar</button>
+        </div>
+    </div>
+
+    <div id="result-container">
+        <div id="result-header">
+            <div>TU TIPO DE ROSTRO ES:</div>
+            <div id="face-shape">Detectando...</div>
+        </div>
+        <div id="result-body">
+            <div id="face-result-text">
+                Encuadra tu rostro dentro del óvalo guía de la cámara.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const videoElement = document.getElementById('webcam');
+        const canvasElement = document.getElementById('overlay');
+        const canvasCtx = canvasElement.getContext('2d');
+        const faceShapeText = document.getElementById('face-shape');
+        const faceResultTextBlock = document.getElementById('face-result-text');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const statusText = document.getElementById('status-text');
+        const retryBtn = document.getElementById('retry-btn');
+
+        const recomendaciones = {
+            "OVALADO": {
+                "desc": "Tienes una simetría natural perfecta. ¡Casi todo te favorece!",
+                "hombre": "✔️ Cuadradas o Rectangulares para dar estructura.<br>✔️ Aviador metálicas (doble puente).",
+                "mujer": "✔️ Cat-Eye para elevar la mirada.<br>✔️ Geométricas / Hexagonales."
+            },
+            "REDONDO": {
+                "desc": "Buscamos ángulos definidos para estilizar y alargar el rostro.",
+                "hombre": "✔️ Cuadradas marcadas o Wayfarer.<br>✔️ Rectangulares de acetato.",
+                "mujer": "✔️ Cat-Eye angular.<br>✔️ Marcos angulares y rectangulares."
+            },
+            "CUADRADO / CORAZÓN": {
+                "desc": "Buscamos suavizar líneas fuertes y equilibrar facciones.",
+                "hombre": "✔️ Redondas u Ovaladas.<br>✔️ Aviador clásicas metálicas.",
+                "mujer": "✔️ Redondas de acetato nude o metal.<br>✔️ Estilos mariposa o curvas suaves."
+            }
+        };
+
+        // Timeout de seguridad en caso de fallo de red
+        setTimeout(() => {
+            if (loadingOverlay.style.display !== 'none') {
+                statusText.innerText = "La conexión tardó demasiado. Asegúrate de dar permisos a la cámara.";
+                retryBtn.style.display = "inline-block";
+            }
+        }, 12000);
+
+        async function initApp() {
+            try {
+                const faceMesh = new FaceMesh({
+                    locateFile: (file) => https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}
+                });
+
+                faceMesh.setOptions({
+                    maxNumFaces: 1,
+                    refineLandmarks: false,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
+
+                faceMesh.onResults(onResults);
+
+                const camera = new Camera(videoElement, {
+                    onFrame: async () => {
+                        await faceMesh.send({image: videoElement});
+                    },
+                    width: 640,
+                    height: 480
+                });
+
+                await camera.start();
+                loadingOverlay.style.display = 'none';
+
+            } catch (err) {
+                console.error(err);
+                statusText.innerText = "Error al abrir la cámara. Verifica los permisos del navegador.";
+                retryBtn.style.display = "inline-block";
+            }
+        }
+
+        function onResults(results) {
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+            if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                const landmarks = results.multiFaceLandmarks[0];
+
+                const topFace = landmarks[10];
+                const bottomFace = landmarks[152];
+                const leftFace = landmarks[234];
+                const rightFace = landmarks[454];
+
+                const faceLength = Math.sqrt(Math.pow(topFace.x - bottomFace.x, 2) + Math.pow(topFace.y - bottomFace.y, 2));
+                const faceWidth = Math.sqrt(Math.pow(leftFace.x - rightFace.x, 2) + Math.pow(leftFace.y - rightFace.y, 2));
+
+                const ratio = faceLength / faceWidth;
+
+                let shape = "REDONDO";
+                if (ratio > 1.32) {
+                    shape = "OVALADO";
+                } else if (ratio < 1.18) {
+                    shape = "REDONDO";
+                } else {
+                    shape = "CUADRADO / CORAZÓN";
+                }
+
+                faceShapeText.innerText = shape;
+
+                const data = recomendaciones[shape];
+                if (data) {
+                    faceResultTextBlock.innerHTML = `
+                        <p style="margin:0 0 10px 0;">${data.desc}</p>
+                        <div class="reco-title">Recomendación Hombre:</div>
+                        <div>${data.hombre}</div>
+                        <div class="reco-title">Recomendación Mujer:</div>
+                        <div>${data.mujer}</div>
+                    `;
+                }
+            }
+            canvasCtx.restore();
+        }
+
+        // Ejecutar al cargar pantalla
+        window.onload = initApp;
+    </script>
+</body>
+</html>
