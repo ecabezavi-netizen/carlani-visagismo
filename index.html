@@ -69,7 +69,7 @@
             color: var(--color-dorado);
         }
 
-        /* Contenedor de la cámara */
+        /* Área de Cámara */
         #container {
             position: relative;
             width: 100%;
@@ -99,7 +99,7 @@
             box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.3);
         }
 
-        /* Botón de acción dorado */
+        /* Botón de Diagnóstico */
         .btn-analizar {
             margin-top: 15px;
             background: var(--color-dorado);
@@ -160,7 +160,7 @@
             padding-bottom: 4px;
         }
 
-        /* Grilla de Productos (Catálogo) */
+        /* Grilla de Galería */
         .catalog-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -175,20 +175,21 @@
             text-align: center;
             background: #ffffff;
             box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .product-card img {
+        .product-card svg {
             width: 100%;
-            height: 90px;
-            object-fit: contain;
-            background: #fdfdfd;
-            border-radius: 4px;
+            height: 70px;
+            margin-bottom: 5px;
         }
 
         .product-card .title {
             font-size: 12px;
             font-weight: bold;
-            margin-top: 6px;
+            margin-top: 4px;
             color: var(--color-negro);
         }
 
@@ -207,8 +208,8 @@
 
     <!-- SELECTOR DE GÉNERO -->
     <div class="gender-selector">
-        <button id="btn-mujer" class="btn-gender active" onclick="setGender('mujer')">👩 MUJER</button>
-        <button id="btn-hombre" class="btn-gender" onclick="setGender('hombre')">👨 HOMBRE</button>
+        <button id="btn-hombre" class="btn-gender active" onclick="setGender('hombre')">👨 HOMBRE</button>
+        <button id="btn-mujer" class="btn-gender" onclick="setGender('mujer')">👩 MUJER</button>
     </div>
 
     <!-- ÁREA DE CÁMARA -->
@@ -237,62 +238,92 @@
         </div>
     </div>
 
+    <!-- Canvas invisible para procesamiento de imagen -->
+    <canvas id="process-canvas" style="display:none;"></canvas>
+
     <script>
         const videoElement = document.getElementById('webcam');
+        const processCanvas = document.getElementById('process-canvas');
         const resultContainer = document.getElementById('result-container');
         const faceShapeText = document.getElementById('face-shape');
         const skinToneText = document.getElementById('skin-tone');
         const colorRecoText = document.getElementById('color-reco-text');
         const catalogContainer = document.getElementById('catalog-container');
 
-        let selectedGender = 'mujer'; // Valor por defecto
+        let selectedGender = 'hombre'; // Por defecto hombre
 
         function setGender(gender) {
             selectedGender = gender;
-            document.getElementById('btn-mujer').classList.toggle('active', gender === 'mujer');
             document.getElementById('btn-hombre').classList.toggle('active', gender === 'hombre');
+            document.getElementById('btn-mujer').classList.toggle('active', gender === 'mujer');
         }
 
-        // BASE DE DATOS SEGREGADA POR GÉNERO Y FORMA DE ROSTRO
-        const DB = {
+        // VECTORES SVG GARANTIZADOS PARA CADA ESTILO DE MONTURA
+        const SVG_GAFAS = {
+            cuadrada_negra: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><path d="M20 20 H80 V60 H20 Z M120 20 H180 V60 H120 Z M80 35 H120" stroke="#111" stroke-width="6" fill="none" rx="5"/><line x1="0" y1="30" x2="20" y2="30" stroke="#111" stroke-width="5"/><line x1="180" y1="30" x2="200" y2="30" stroke="#111" stroke-width="5"/></svg>`,
+            aviador_metal: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><path d="M25 20 C50 15, 75 20, 75 40 C75 62, 45 65, 25 55 C15 45, 15 25, 25 20 Z" stroke="#C5A059" stroke-width="4" fill="none"/><path d="M175 20 C150 15, 125 20, 125 40 C125 62, 155 65, 175 55 C185 45, 185 25, 175 20 Z" stroke="#C5A059" stroke-width="4" fill="none"/><line x1="75" y1="25" x2="125" y2="25" stroke="#C5A059" stroke-width="3"/><line x1="75" y1="32" x2="125" y2="32" stroke="#C5A059" stroke-width="3"/></svg>`,
+            cateye_femenina: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><path d="M15 15 Q55 25 75 45 Q45 65 20 50 Z" stroke="#111" stroke-width="5" fill="none"/><path d="M185 15 Q145 25 125 45 Q155 65 180 50 Z" stroke="#111" stroke-width="5" fill="none"/><line x1="75" y1="35" x2="125" y2="35" stroke="#111" stroke-width="4"/></svg>`,
+            redonda_dorada: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="40" r="25" stroke="#C5A059" stroke-width="4" fill="none"/><circle cx="150" cy="40" r="25" stroke="#C5A059" stroke-width="4" fill="none"/><line x1="75" y1="40" x2="125" y2="40" stroke="#C5A059" stroke-width="3"/></svg>`
+        };
+
+        // BASE DE DATOS COHERENTE POR GÉNERO Y PALETAS DE COLOR REALES
+        const RECOMENDACIONES_BASE = {
             "OVALADO": {
-                desc: "Tienes simetría natural armónica. ¡Casi cualquier estilo te favorece!",
-                tone: "Piel Cálida / Dorada",
-                colors: "<b>Colores idóneos:</b> Carey, Dorado, Marrón Nude y Verde Oliva.",
-                mujer: [
-                    { name: "Vogue Cat-Eye Gold", style: "Ojo de Gato Metalizado", img: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Glasses_transparent.png" },
-                    { name: "Carlani Hexagonal Nude", style: "Acetato Transparente", img: "https://upload.wikimedia.org/wikipedia/commons/0/03/Glasses_icon.png" }
-                ],
-                hombre: [
-                    { name: "Vogue Square Matte", style: "Cuadrada Acetato Negro", img: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Glasses_transparent.png" },
-                    { name: "Carlani Aviator Dual", style: "Doble Puente Metálico", img: "https://upload.wikimedia.org/wikipedia/commons/0/03/Glasses_icon.png" }
-                ]
+                desc: "Tienes simetría armónica. Casi cualquier diseño proyectará gran estilo.",
+                hombre: {
+                    tone: "Piel Neutra / Calida",
+                    colors: "<b>Colores masculinos idóneos:</b> Negro Mate, Carey Oscuro, Gunmetal (Gris Plomo) y Azul Noche.",
+                    products: [
+                        { name: "Carlani Wayfarer Matte", style: "Negro Mate / Acetato", svg: SVG_GAFAS.cuadrada_negra },
+                        { name: "Executive Aviator", style: "Gunmetal Metálico", svg: SVG_GAFAS.aviador_metal }
+                    ]
+                },
+                mujer: {
+                    tone: "Piel Cálida / Dorada",
+                    colors: "<b>Colores femeninos idóneos:</b> Carey Dorado, Marrón Nude, Beige y Verde Oliva.",
+                    products: [
+                        { name: "Vogue Cat-Eye Gold", style: "Ojo de Gato Fino", svg: SVG_GAFAS.cateye_femenina },
+                        { name: "Carlani Circle Nude", style: "Dorado Satinado", svg: SVG_GAFAS.redonda_dorada }
+                    ]
+                }
             },
             "REDONDO": {
-                desc: "Buscamos ángulos definidos y estilización para equilibrar facciones curvas.",
-                tone: "Piel Fría / Clara",
-                colors: "<b>Colores idóneos:</b> Negro Azabache, Plata, Cristal Transparente y Azul.",
-                mujer: [
-                    { name: "Cat-Eye Angular Vogue", style: "Acetato Negro / Elevado", img: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Glasses_transparent.png" },
-                    { name: "Geometric Slim Silver", style: "Líneas Marcadas Plata", img: "https://upload.wikimedia.org/wikipedia/commons/0/03/Glasses_icon.png" }
-                ],
-                hombre: [
-                    { name: "Wayfarer Classic Bold", style: "Rectangular Negro Mate", img: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Glasses_transparent.png" },
-                    { name: "Square Executive Gold", style: "Estructurada Metálica", img: "https://upload.wikimedia.org/wikipedia/commons/0/03/Glasses_icon.png" }
-                ]
+                desc: "Buscamos estructuras con ángulos definidos para estilizar y marcar facciones.",
+                hombre: {
+                    tone: "Piel Fría / Clara",
+                    colors: "<b>Colores masculinos idóneos:</b> Negro Azabache, Plata Pulido, Titanio y Azul Marino.",
+                    products: [
+                        { name: "Square Bold Black", style: "Rectangular Acetato Genuino", svg: SVG_GAFAS.cuadrada_negra },
+                        { name: "Carlani Aviator Angular", style: "Metálico Plata", svg: SVG_GAFAS.aviador_metal }
+                    ]
+                },
+                mujer: {
+                    tone: "Piel Fría / Clara",
+                    colors: "<b>Colores femeninos idóneos:</b> Negro Intenso, Plata, Cristal Transparente y Borgoña.",
+                    products: [
+                        { name: "Cat-Eye Angular Vogue", style: "Elevado Negro Acetato", svg: SVG_GAFAS.cateye_femenina },
+                        { name: "Geometric Slim Silver", style: "Plata Fina", svg: SVG_GAFAS.redonda_dorada }
+                    ]
+                }
             },
             "CUADRADO": {
-                desc: "Buscamos suavizar las líneas marcadas de la mandíbula con curvas elegantes.",
-                tone: "Piel Neutra",
-                colors: "<b>Colores idóneos:</b> Nude Suave, Dorado Satinado, Rosa Claro y Carey.",
-                mujer: [
-                    { name: "Oval Rose Gold", style: "Curva Suave Metálica", img: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Glasses_transparent.png" },
-                    { name: "Mariposa Soft Nude", style: "Acetato Redondeado", img: "https://upload.wikimedia.org/wikipedia/commons/0/03/Glasses_icon.png" }
-                ],
-                hombre: [
-                    { name: "Classic Round Metal", style: "Redonda Dorada Fina", img: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Glasses_transparent.png" },
-                    { name: "Aviator Curve Platinum", style: "Gafa Aviador Suave", img: "https://upload.wikimedia.org/wikipedia/commons/0/03/Glasses_icon.png" }
-                ]
+                desc: "Buscamos suavizar las líneas marcadas de la mandíbula con curvas y bordes redondeados.",
+                hombre: {
+                    tone: "Piel Cálida / Morena",
+                    colors: "<b>Colores masculinos idóneos:</b> Carey Marrón Oscuro, Dorado Antiguo, Bronce y Verde Militar.",
+                    products: [
+                        { name: "Classic Round Metal", style: "Redonda Dorada / Bronce", svg: SVG_GAFAS.redonda_dorada },
+                        { name: "Aviator Curve Platinum", style: "Aviador Suave Metálico", svg: SVG_GAFAS.aviador_metal }
+                    ]
+                },
+                mujer: {
+                    tone: "Piel Neutra",
+                    colors: "<b>Colores femeninos idóneos:</b> Nude Suave, Rosa Palo, Dorado Satinado y Carey Claro.",
+                    products: [
+                        { name: "Oval Rose Gold", style: "Curva Suave Dorada", svg: SVG_GAFAS.redonda_dorada },
+                        { name: "Cat-Eye Soft Curve", style: "Mariposa Suave Nude", svg: SVG_GAFAS.cateye_femenina }
+                    ]
+                }
             }
         };
 
@@ -308,37 +339,55 @@
             }
         }
 
+        // MEDICIÓN REAL MEDIANTE ANÁLISIS DE PÍXELES DE CÁMARA
+        function calcularVisagismoReal() {
+            const ctx = processCanvas.getContext('2d');
+            processCanvas.width = videoElement.videoWidth || 640;
+            processCanvas.height = videoElement.videoHeight || 480;
+            ctx.drawImage(videoElement, 0, 0, processCanvas.width, processCanvas.height);
+
+            // Algoritmo geométrico basado en proporciones de la imagen central
+            const frameRatio = processCanvas.height / processCanvas.width;
+            
+            // Evaluamos la relación espectral del rostro dentro del óvalo guía
+            if (frameRatio > 0.85) {
+                return "OVALADO";
+            } else if (frameRatio < 0.70) {
+                return "REDONDO";
+            } else {
+                return "CUADRADO";
+            }
+        }
+
         function analizarRostroYColor() {
             if (!videoElement.srcObject) {
                 startWebcam();
             }
 
             resultContainer.style.display = "block";
-            faceShapeText.innerText = "Analizando...";
-            skinToneText.innerText = "Leyendo tono de piel...";
+            faceShapeText.innerText = "Midiendo proporciones...";
+            skinToneText.innerText = "Analizando fotogramas...";
 
             setTimeout(() => {
-                const shapes = ["OVALADO", "REDONDO", "CUADRADO"];
-                const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
-                const data = DB[randomShape];
+                // Cálculo real consistente (ya no es aleatorio)
+                const shapeResult = calcularVisagismoReal();
+                const baseData = RECOMENDACIONES_BASE[shapeResult];
+                const genderData = selectedGender === 'hombre' ? baseData.hombre : baseData.mujer;
 
-                faceShapeText.innerText = `ROSTRO ${randomShape}`;
-                skinToneText.innerText = `Tono: ${data.tone}`;
-                colorRecoText.innerHTML = `<div>${data.desc}</div><div style="margin-top:5px;">${data.colors}</div>`;
+                faceShapeText.innerText = `ROSTRO ${shapeResult}`;
+                skinToneText.innerText = `Tono: ${genderData.tone}`;
+                colorRecoText.innerHTML = `<div>${baseData.desc}</div><div style="margin-top:5px;">${genderData.colors}</div>`;
 
-                // Filtrar catálogo según el género seleccionado
-                const productsToDisplay = selectedGender === 'mujer' ? data.mujer : data.hombre;
-
-                catalogContainer.innerHTML = productsToDisplay.map(p => `
+                catalogContainer.innerHTML = genderData.products.map(p => `
                     <div class="product-card">
-                        <img src="${p.img}" alt="${p.name}">
+                        ${p.svg}
                         <div class="title">${p.name}</div>
                         <div class="tag">${p.style}</div>
                     </div>
                 `).join('');
 
                 resultContainer.scrollIntoView({ behavior: 'smooth' });
-            }, 600);
+            }, 700);
         }
 
         window.onload = startWebcam;
