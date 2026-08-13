@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Óptica Carlani - Visagismo de Precisión IA</title>
+    <title>Óptica Carlani - Visagismo Pro IA</title>
     
     <!-- Librerías de IA Facial de Google MediaPipe -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
@@ -199,7 +199,7 @@
 <body>
 
     <h1>ÓPTICA CARLANI</h1>
-    <div class="subtitle">Visagismo & Calibración IA</div>
+    <div class="subtitle">Visagismo de Precisión IA - 6 Tipologías Facial</div>
 
     <!-- SELECTOR DE GÉNERO -->
     <div class="gender-selector">
@@ -220,7 +220,7 @@
     <div id="result-container">
         <div id="result-header">
             <div style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">Diagnóstico de Visagismo Carlani</div>
-            <div id="face-shape" class="badge-result">Procesando...</div>
+            <div id="face-shape" class="badge-result">Calculando...</div>
             <div id="skin-tone" style="font-size: 13px; color: #fff; margin-top: 4px;">---</div>
         </div>
         
@@ -259,6 +259,7 @@
             redonda_dorada: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="40" r="25" stroke="#C5A059" stroke-width="4" fill="none"/><circle cx="150" cy="40" r="25" stroke="#C5A059" stroke-width="4" fill="none"/><line x1="75" y1="40" x2="125" y2="40" stroke="#C5A059" stroke-width="3"/></svg>`
         };
 
+        // BASE DE DATOS DE LOS 6 TIPOS DE ROSTRO SEGREGADA POR GÉNERO
         const RECOMENDACIONES_BASE = {
             "OVALADO": {
                 desc: "Tienes una simetría armónica ideal. El objetivo es mantener el equilibrio natural.",
@@ -299,7 +300,7 @@
                 }
             },
             "CUADRADO": {
-                desc: "Buscamos suavizar la mandíbula angular mediante monturas redondeadas u ovaladas.",
+                desc: "Buscamos suavizar la mandíbula angular mediante monturas redondeadas u ovaladas de líneas suaves.",
                 hombre: {
                     tone: "Piel Cálida / Morena",
                     colors: "<b>Colores masculinos idóneos:</b> Carey Marrón Oscuro, Dorado Antiguo y Bronce.",
@@ -316,10 +317,48 @@
                         { name: "Cat-Eye Soft Curve", style: "Mariposa Suave Nude", svg: SVG_GAFAS.cateye_femenina }
                     ]
                 }
+            },
+            "RECTANGULAR": {
+                desc: "Tienes ángulos definidos y una estructura alargada. Buscamos monturas altas o redondas que acorten visualmente el rostro.",
+                hombre: {
+                    tone: "Piel Neutra / Calida",
+                    colors: "<b>Colores masculinos idóneos:</b> Carey Oscuro, Negro Satinado, Gris Plomo y Bronce.",
+                    products: [
+                        { name: "Carlani Round Deep", style: "Redonda de Acetato Oscuro", svg: SVG_GAFAS.redonda_dorada },
+                        { name: "Aviator Classic Gold", style: "Aviador Grande Metálico", svg: SVG_GAFAS.aviador_metal }
+                    ]
+                },
+                mujer: {
+                    tone: "Piel Fría / Clara",
+                    colors: "<b>Colores femeninos idóneos:</b> Borgoña, Carey Cálido, Dorado Satinado y Miel.",
+                    products: [
+                        { name: "Oversized Round Vogue", style: "Redonda de Acetato Grande", svg: SVG_GAFAS.redonda_dorada },
+                        { name: "Cat-Eye Wide Style", style: "Ojo de Gato de Lente Ancha", svg: SVG_GAFAS.cateye_femenina }
+                    ]
+                }
+            },
+            "CORAZÓN": {
+                desc: "Frente o pómulos anchos con mentón afinado. Buscamos equilibrar la parte inferior con monturas de marco fino o al aire.",
+                hombre: {
+                    tone: "Piel Clara / Neutra",
+                    colors: "<b>Colores masculinos idóneos:</b> Plata Satinado, Titanio Transparente, Azul Claro y Gris Metal.",
+                    products: [
+                        { name: "Slim Round Silver", style: "Metálica Redonda Plata", svg: SVG_GAFAS.redonda_dorada },
+                        { name: "Wayfarer Soft Edges", style: "Acetato Delgado Transparente", svg: SVG_GAFAS.cuadrada_negra }
+                    ]
+                },
+                mujer: {
+                    tone: "Piel Cálida / Dorada",
+                    colors: "<b>Colores femeninos idóneos:</b> Cristal Transparente, Rosa Palo, Dorado Fino y Celeste.",
+                    products: [
+                        { name: "Soft Cat-Eye Crystal", style: "Transparente / Dorado Fino", svg: SVG_GAFAS.cateye_femenina },
+                        { name: "Circle Light Gold", style: "Metálica Ligera Dorada", svg: SVG_GAFAS.redonda_dorada }
+                    ]
+                }
             }
         };
 
-        // MEDIAPIPE FACE MESH CONFIGURACIÓN
+        // CONFIGURACIÓN MEDIAPIPE FACE MESH
         const faceMesh = new FaceMesh({
             locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
         });
@@ -342,10 +381,9 @@
             if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                 currentLandmarks = results.multiFaceLandmarks[0];
 
-                // Dibujar guías anatómicas doradas en tiempo real
+                // Dibujar puntos de escáner facial en vivo
                 canvasCtx.fillStyle = '#C5A059';
-                // Puntos clave de control (Frente, Pómulos, Mandíbula, Mentón)
-                const keyIndices = [10, 152, 234, 454, 58, 288, 136, 365];
+                const keyIndices = [10, 152, 234, 454, 136, 365, 103, 332];
                 for (const idx of keyIndices) {
                     const pt = currentLandmarks[idx];
                     const x = pt.x * canvasElement.width;
@@ -370,40 +408,54 @@
 
         camera.start();
 
-        // ALGORITMO NORMALIZADO CON TOLERANCIA DE LENTE
-        function calcularFormaNormalizada() {
+        // ALGORITMO CIENTÍFICO DE VISAGISMO PARA 5 TIPOLOGÍAS
+        function calcularFormaExactaIA() {
             if (!currentLandmarks) return "OVALADO";
 
-            // Puntos Anatómicos MediaPipe:
+            // Puntos Clave de Control Anatómico:
             const top = currentLandmarks[10];        // Frente superior
-            const bottom = currentLandmarks[152];    // Mentón inferior
-            const leftCheek = currentLandmarks[234];  // Pómulo izquierdo
-            const rightCheek = currentLandmarks[454]; // Pómulo derecho
-            const leftJaw = currentLandmarks[136];    // Mandíbula izquierda
-            const rightJaw = currentLandmarks[365];   // Mandíbula derecha
+            const bottom = currentLandmarks[152];    // Mentón
+            const leftCheek = currentLandmarks[234];  // Pómulo izq
+            const rightCheek = currentLandmarks[454]; // Pómulo der
+            const leftJaw = currentLandmarks[136];    // Mandíbula izq
+            const rightJaw = currentLandmarks[365];   // Mandíbula der
+            const leftForehead = currentLandmarks[103]; // Frente izq
+            const rightForehead = currentLandmarks[332];// Frente der
 
-            // Distancias normalizadas
+            // Distancias calculadas
             const largoRostro = Math.hypot(top.x - bottom.x, top.y - bottom.y);
             const anchoPomulos = Math.hypot(leftCheek.x - rightCheek.x, leftCheek.y - rightCheek.y);
             const anchoMandibula = Math.hypot(leftJaw.x - rightJaw.x, leftJaw.y - rightJaw.y);
+            const anchoFrente = Math.hypot(leftForehead.x - rightForehead.x, leftForehead.y - rightForehead.y);
 
-            // Proporciones ajustadas
+            // Proporciones Críticas
             const ratioLargoAncho = largoRostro / anchoPomulos;
             const ratioMandibulaPomulos = anchoMandibula / anchoPomulos;
+            const ratioMentonFrente = anchoMandibula / anchoFrente;
 
-            // UMBRALES CALIBRADOS (Evita la falsa detección de rostros cuadrados):
-            
-            // 1. ROSTRO REDONDO: Rostro proporcionalmente corto y ancho
-            if (ratioLargoAncho < 1.30) {
-                return "REDONDO";
+            // MATRIZ DE DECISIÓN MATEMÁTICA REAL:
+
+            // 1. ROSTRO CORAZÓN: Frente/Pómulos anchos y mandíbula marcadamente más fina (< 0.72)
+            if (ratioMentonFrente < 0.72 && ratioMandibulaPomulos < 0.76) {
+                return "CORAZÓN";
             }
-            
-            // 2. ROSTRO CUADRADO: Solo si la mandíbula es verdaderamente igual o más ancha que los pómulos (> 0.88)
-            if (ratioMandibulaPomulos > 0.88) {
+
+            // 2. ROSTROS CON ÁNGULOS MANDIBULARES MARCADOS (> 0.85):
+            if (ratioMandibulaPomulos > 0.85) {
+                // Si además es marcadamente alargado (> 1.32) -> RECTANGULAR
+                if (ratioLargoAncho > 1.32) {
+                    return "RECTANGULAR";
+                }
+                // Si es compacto (< 1.32) -> CUADRADO
                 return "CUADRADO";
             }
 
-            // 3. ROSTRO OVALADO: Rostro más largo que ancho con mandíbula perfilada
+            // 3. ROSTRO REDONDO: Sin ángulos marcados y de estructura corta/compacta (< 1.22)
+            if (ratioLargoAncho < 1.22) {
+                return "REDONDO";
+            }
+
+            // 4. ROSTRO OVALADO: Estructura alargada (> 1.22) con mentón y mandíbula suaves
             return "OVALADO";
         }
 
@@ -414,10 +466,10 @@
             }
 
             resultContainer.style.display = "block";
-            faceShapeText.innerText = "Escaneando visagismo...";
+            faceShapeText.innerText = "Calculando proporciones...";
 
             setTimeout(() => {
-                const shapeResult = calcularFormaNormalizada();
+                const shapeResult = calcularFormaExactaIA();
                 const baseData = RECOMENDACIONES_BASE[shapeResult];
                 const genderData = selectedGender === 'hombre' ? baseData.hombre : baseData.mujer;
 
