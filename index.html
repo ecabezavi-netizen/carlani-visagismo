@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Óptica Carlani - Visagismo Precision IA</title>
+    <title>Óptica Carlani - Visagismo de Precisión IA</title>
     
-    <!-- Librerías de IA Facial de Google -->
+    <!-- Librerías de IA Facial de Google MediaPipe -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
 
@@ -78,7 +78,7 @@
             position: relative;
             width: 100%;
             max-width: 480px;
-            height: 320px;
+            height: 340px;
             border-radius: 15px;
             overflow: hidden;
             background: #111;
@@ -199,7 +199,7 @@
 <body>
 
     <h1>ÓPTICA CARLANI</h1>
-    <div class="subtitle">Visagismo de Alta Precisión IA</div>
+    <div class="subtitle">Visagismo & Calibración IA</div>
 
     <!-- SELECTOR DE GÉNERO -->
     <div class="gender-selector">
@@ -214,13 +214,13 @@
     </div>
 
     <!-- BOTÓN DE DIAGNÓSTICO -->
-    <button class="btn-analizar" onclick="ejecutarAnalisisIA()">✨ ESCANEAR VISAGISMO REAL</button>
+    <button class="btn-analizar" onclick="ejecutarAnalisisIA()">✨ ESCANEAR Y DIAGNOSTICAR ROSTRO</button>
 
     <!-- ÁREA DE RESULTADOS -->
     <div id="result-container">
         <div id="result-header">
-            <div style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">Diagnóstico Personalizado Carlani</div>
-            <div id="face-shape" class="badge-result">Escaneando...</div>
+            <div style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">Diagnóstico de Visagismo Carlani</div>
+            <div id="face-shape" class="badge-result">Procesando...</div>
             <div id="skin-tone" style="font-size: 13px; color: #fff; margin-top: 4px;">---</div>
         </div>
         
@@ -280,7 +280,7 @@
                 }
             },
             "REDONDO": {
-                desc: "Buscamos estructuras con ángulos marcados para estilizar y contrastar las líneas curvas.",
+                desc: "Buscamos estructuras con ángulos marcados para estilizar y contrastar las líneas curvas del rostro.",
                 hombre: {
                     tone: "Piel Fría / Clara",
                     colors: "<b>Colores masculinos idóneos:</b> Negro Azabache, Plata Pulido, Titanio y Azul Marino.",
@@ -299,7 +299,7 @@
                 }
             },
             "CUADRADO": {
-                desc: "Buscamos suavizar la mandíbula marcada mediante monturas redondeadas u ovaladas.",
+                desc: "Buscamos suavizar la mandíbula angular mediante monturas redondeadas u ovaladas.",
                 hombre: {
                     tone: "Piel Cálida / Morena",
                     colors: "<b>Colores masculinos idóneos:</b> Carey Marrón Oscuro, Dorado Antiguo y Bronce.",
@@ -319,7 +319,7 @@
             }
         };
 
-        // INICIALIZACIÓN DE LA IA DE MEDIAPIPE FACE MESH
+        // MEDIAPIPE FACE MESH CONFIGURACIÓN
         const faceMesh = new FaceMesh({
             locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
         });
@@ -342,12 +342,17 @@
             if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                 currentLandmarks = results.multiFaceLandmarks[0];
 
-                // Dibujar puntos faciales sutiles en dorado para dar sensación de escáner futurista
+                // Dibujar guías anatómicas doradas en tiempo real
                 canvasCtx.fillStyle = '#C5A059';
-                for (const landmark of currentLandmarks) {
-                    const x = landmark.x * canvasElement.width;
-                    const y = landmark.y * canvasElement.height;
-                    canvasCtx.fillRect(x, y, 1.5, 1.5);
+                // Puntos clave de control (Frente, Pómulos, Mandíbula, Mentón)
+                const keyIndices = [10, 152, 234, 454, 58, 288, 136, 365];
+                for (const idx of keyIndices) {
+                    const pt = currentLandmarks[idx];
+                    const x = pt.x * canvasElement.width;
+                    const y = pt.y * canvasElement.height;
+                    canvasCtx.beginPath();
+                    canvasCtx.arc(x, y, 3, 0, 2 * Math.PI);
+                    canvasCtx.fill();
                 }
             } else {
                 currentLandmarks = null;
@@ -365,37 +370,40 @@
 
         camera.start();
 
-        // ALGORITMO CIENTÍFICO DE VISAGISMO SEGÚN PUNTOS ANATÓMICOS REALES
-        function calcularFormaRealIA() {
-            if (!currentLandmarks) return "OVALADO"; // Default por seguridad
+        // ALGORITMO NORMALIZADO CON TOLERANCIA DE LENTE
+        function calcularFormaNormalizada() {
+            if (!currentLandmarks) return "OVALADO";
 
-            // Puntos Anatómicos MediaPipe Face Mesh:
-            const top = currentLandmarks[10];       // Frente superior
-            const bottom = currentLandmarks[152];   // Mentón
-            const leftCheek = currentLandmarks[234]; // Pómulo izquierdo
-            const rightCheek = currentLandmarks[454];// Pómulo derecho
-            const leftJaw = currentLandmarks[58];   // Ángulo mandíbula izquierda
-            const rightJaw = currentLandmarks[288];  // Ángulo mandíbula derecha
+            // Puntos Anatómicos MediaPipe:
+            const top = currentLandmarks[10];        // Frente superior
+            const bottom = currentLandmarks[152];    // Mentón inferior
+            const leftCheek = currentLandmarks[234];  // Pómulo izquierdo
+            const rightCheek = currentLandmarks[454]; // Pómulo derecho
+            const leftJaw = currentLandmarks[136];    // Mandíbula izquierda
+            const rightJaw = currentLandmarks[365];   // Mandíbula derecha
 
-            // Distancias Euclidianas
+            // Distancias normalizadas
             const largoRostro = Math.hypot(top.x - bottom.x, top.y - bottom.y);
             const anchoPomulos = Math.hypot(leftCheek.x - rightCheek.x, leftCheek.y - rightCheek.y);
             const anchoMandibula = Math.hypot(leftJaw.x - rightJaw.x, leftJaw.y - rightJaw.y);
 
-            // Ratios Críticos
+            // Proporciones ajustadas
             const ratioLargoAncho = largoRostro / anchoPomulos;
             const ratioMandibulaPomulos = anchoMandibula / anchoPomulos;
 
-            // REGLAS ANATÓMICAS RIGUROSAS:
-            // 1. Rostro Cuadrado: Mandíbula ancha y marcada (ratio mandíbula/pómulos > 0.82)
-            if (ratioMandibulaPomulos > 0.83) {
-                return "CUADRADO";
-            }
-            // 2. Rostro Redondo: Largo similar al ancho (ratio largo/ancho < 1.25)
-            if (ratioLargoAncho < 1.25) {
+            // UMBRALES CALIBRADOS (Evita la falsa detección de rostros cuadrados):
+            
+            // 1. ROSTRO REDONDO: Rostro proporcionalmente corto y ancho
+            if (ratioLargoAncho < 1.30) {
                 return "REDONDO";
             }
-            // 3. Rostro Ovalado: Largo significativamente mayor al ancho (ratio largo/ancho >= 1.25 y mandíbula fina)
+            
+            // 2. ROSTRO CUADRADO: Solo si la mandíbula es verdaderamente igual o más ancha que los pómulos (> 0.88)
+            if (ratioMandibulaPomulos > 0.88) {
+                return "CUADRADO";
+            }
+
+            // 3. ROSTRO OVALADO: Rostro más largo que ancho con mandíbula perfilada
             return "OVALADO";
         }
 
@@ -406,10 +414,10 @@
             }
 
             resultContainer.style.display = "block";
-            faceShapeText.innerText = "Escaneando Puntos Músculo-Óseos...";
+            faceShapeText.innerText = "Escaneando visagismo...";
 
             setTimeout(() => {
-                const shapeResult = calcularFormaRealIA();
+                const shapeResult = calcularFormaNormalizada();
                 const baseData = RECOMENDACIONES_BASE[shapeResult];
                 const genderData = selectedGender === 'hombre' ? baseData.hombre : baseData.mujer;
 
@@ -426,7 +434,7 @@
                 `).join('');
 
                 resultContainer.scrollIntoView({ behavior: 'smooth' });
-            }, 500);
+            }, 400);
         }
     </script>
 </body>
