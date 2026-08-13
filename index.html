@@ -36,13 +36,40 @@
 
         .subtitle {
             font-size: 11px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-transform: uppercase;
             letter-spacing: 1px;
             text-align: center;
         }
 
-        /* Contenedor de la cámara limpio */
+        /* Selector de Género */
+        .gender-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .btn-gender {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--color-negro);
+            background: transparent;
+            color: var(--color-negro);
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-gender.active {
+            background: var(--color-negro);
+            color: var(--color-dorado);
+        }
+
+        /* Contenedor de la cámara */
         #container {
             position: relative;
             width: 100%;
@@ -133,6 +160,7 @@
             padding-bottom: 4px;
         }
 
+        /* Grilla de Productos (Catálogo) */
         .catalog-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -145,13 +173,15 @@
             border-radius: 8px;
             padding: 10px;
             text-align: center;
-            background: #fafafa;
+            background: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
         }
 
         .product-card img {
             width: 100%;
-            height: 85px;
+            height: 90px;
             object-fit: contain;
+            background: #fdfdfd;
             border-radius: 4px;
         }
 
@@ -159,6 +189,7 @@
             font-size: 12px;
             font-weight: bold;
             margin-top: 6px;
+            color: var(--color-negro);
         }
 
         .product-card .tag {
@@ -174,7 +205,13 @@
     <h1>ÓPTICA CARLANI</h1>
     <div class="subtitle">Visagismo & Colorimetría IA</div>
 
-    <!-- ÁREA DE CÁMARA (Limpia) -->
+    <!-- SELECTOR DE GÉNERO -->
+    <div class="gender-selector">
+        <button id="btn-mujer" class="btn-gender active" onclick="setGender('mujer')">👩 MUJER</button>
+        <button id="btn-hombre" class="btn-gender" onclick="setGender('hombre')">👨 HOMBRE</button>
+    </div>
+
+    <!-- ÁREA DE CÁMARA -->
     <div id="container">
         <video id="webcam" autoplay playsinline muted></video>
         <div id="face-guide"></div>
@@ -186,7 +223,7 @@
     <!-- ÁREA DE RESULTADOS -->
     <div id="result-container">
         <div id="result-header">
-            <div style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">Diagnóstico Carlani</div>
+            <div style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">Diagnóstico Personalizado Carlani</div>
             <div id="face-shape" class="badge-result">---</div>
             <div id="skin-tone" style="font-size: 13px; color: #fff; margin-top: 4px;">---</div>
         </div>
@@ -195,7 +232,7 @@
             <div class="section-title">🎨 Paleta de Colores Recomendada</div>
             <div id="color-reco-text">---</div>
 
-            <div class="section-title">👓 Monturas Ideales en Catálogo</div>
+            <div class="section-title">👓 Monturas Exclusivas Recomendadas</div>
             <div id="catalog-container" class="catalog-grid"></div>
         </div>
     </div>
@@ -208,37 +245,57 @@
         const colorRecoText = document.getElementById('color-reco-text');
         const catalogContainer = document.getElementById('catalog-container');
 
-        const recomendaciones = [
-            {
-                shape: "ROSTRO OVALADO",
+        let selectedGender = 'mujer'; // Valor por defecto
+
+        function setGender(gender) {
+            selectedGender = gender;
+            document.getElementById('btn-mujer').classList.toggle('active', gender === 'mujer');
+            document.getElementById('btn-hombre').classList.toggle('active', gender === 'hombre');
+        }
+
+        // BASE DE DATOS SEGREGADA POR GÉNERO Y FORMA DE ROSTRO
+        const DB = {
+            "OVALADO": {
+                desc: "Tienes simetría natural armónica. ¡Casi cualquier estilo te favorece!",
                 tone: "Piel Cálida / Dorada",
                 colors: "<b>Colores idóneos:</b> Carey, Dorado, Marrón Nude y Verde Oliva.",
-                products: [
-                    { name: "Vogue Elegance", style: "Carey / Dorado", img: "https://images.unsplash.com/photo-1591076482161-42ce6da69f67?w=300&auto=format&fit=crop" },
-                    { name: "Carlani Wayfarer", style: "Negro Mate / Dorado", img: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300&auto=format&fit=crop" }
+                mujer: [
+                    { name: "Vogue Cat-Eye Gold", style: "Ojo de Gato Metalizado", img: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Glasses_transparent.png" },
+                    { name: "Carlani Hexagonal Nude", style: "Acetato Transparente", img: "https://upload.wikimedia.org/wikipedia/commons/0/03/Glasses_icon.png" }
+                ],
+                hombre: [
+                    { name: "Vogue Square Matte", style: "Cuadrada Acetato Negro", img: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Glasses_transparent.png" },
+                    { name: "Carlani Aviator Dual", style: "Doble Puente Metálico", img: "https://upload.wikimedia.org/wikipedia/commons/0/03/Glasses_icon.png" }
                 ]
             },
-            {
-                shape: "ROSTRO REDONDO",
+            "REDONDO": {
+                desc: "Buscamos ángulos definidos y estilización para equilibrar facciones curvas.",
                 tone: "Piel Fría / Clara",
                 colors: "<b>Colores idóneos:</b> Negro Azabache, Plata, Cristal Transparente y Azul.",
-                products: [
-                    { name: "Cat-Eye Vogue", style: "Negro Angular", img: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=300&auto=format&fit=crop" },
-                    { name: "Hexagonal Premium", style: "Metálico Plata", img: "https://images.unsplash.com/photo-1577803645773-f96470509666?w=300&auto=format&fit=crop" }
+                mujer: [
+                    { name: "Cat-Eye Angular Vogue", style: "Acetato Negro / Elevado", img: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Glasses_transparent.png" },
+                    { name: "Geometric Slim Silver", style: "Líneas Marcadas Plata", img: "https://upload.wikimedia.org/wikipedia/commons/0/03/Glasses_icon.png" }
+                ],
+                hombre: [
+                    { name: "Wayfarer Classic Bold", style: "Rectangular Negro Mate", img: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Glasses_transparent.png" },
+                    { name: "Square Executive Gold", style: "Estructurada Metálica", img: "https://upload.wikimedia.org/wikipedia/commons/0/03/Glasses_icon.png" }
                 ]
             },
-            {
-                shape: "ROSTRO CUADRADO",
-                tone: "Piel Neutra / Calida",
-                colors: "<b>Colores idóneos:</b> Nude Suave, Dorado, Rosa Claro y Carey.",
-                products: [
-                    { name: "Aviador Doble Puente", style: "Dorado Satinado", img: "https://images.unsplash.com/photo-1508296695146-257a814070b4?w=300&auto=format&fit=crop" },
-                    { name: "Oval Acetato", style: "Nude Transparente", img: "https://images.unsplash.com/photo-1509695507497-903c140c43b0?w=300&auto=format&fit=crop" }
+            "CUADRADO": {
+                desc: "Buscamos suavizar las líneas marcadas de la mandíbula con curvas elegantes.",
+                tone: "Piel Neutra",
+                colors: "<b>Colores idóneos:</b> Nude Suave, Dorado Satinado, Rosa Claro y Carey.",
+                mujer: [
+                    { name: "Oval Rose Gold", style: "Curva Suave Metálica", img: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Glasses_transparent.png" },
+                    { name: "Mariposa Soft Nude", style: "Acetato Redondeado", img: "https://upload.wikimedia.org/wikipedia/commons/0/03/Glasses_icon.png" }
+                ],
+                hombre: [
+                    { name: "Classic Round Metal", style: "Redonda Dorada Fina", img: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Glasses_transparent.png" },
+                    { name: "Aviator Curve Platinum", style: "Gafa Aviador Suave", img: "https://upload.wikimedia.org/wikipedia/commons/0/03/Glasses_icon.png" }
                 ]
             }
-        ];
+        };
 
-        // Función directa para activar la cámara sin capas ni restricciones
         async function startWebcam() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -252,7 +309,6 @@
         }
 
         function analizarRostroYColor() {
-            // Asegurar transmisión de video si aún no ha iniciado
             if (!videoElement.srcObject) {
                 startWebcam();
             }
@@ -262,13 +318,18 @@
             skinToneText.innerText = "Leyendo tono de piel...";
 
             setTimeout(() => {
-                const data = recomendaciones[Math.floor(Math.random() * recomendaciones.length)];
+                const shapes = ["OVALADO", "REDONDO", "CUADRADO"];
+                const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+                const data = DB[randomShape];
 
-                faceShapeText.innerText = data.shape;
+                faceShapeText.innerText = `ROSTRO ${randomShape}`;
                 skinToneText.innerText = `Tono: ${data.tone}`;
-                colorRecoText.innerHTML = data.colors;
+                colorRecoText.innerHTML = `<div>${data.desc}</div><div style="margin-top:5px;">${data.colors}</div>`;
 
-                catalogContainer.innerHTML = data.products.map(p => `
+                // Filtrar catálogo según el género seleccionado
+                const productsToDisplay = selectedGender === 'mujer' ? data.mujer : data.hombre;
+
+                catalogContainer.innerHTML = productsToDisplay.map(p => `
                     <div class="product-card">
                         <img src="${p.img}" alt="${p.name}">
                         <div class="title">${p.name}</div>
@@ -280,7 +341,6 @@
             }, 600);
         }
 
-        // Ejecutar de inmediato al cargar la página
         window.onload = startWebcam;
     </script>
 </body>
