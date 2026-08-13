@@ -3,35 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Óptica Carlani - Visagismo IA</title>
-    
-    <style>
-        :root {
-            --color-nude: #F5F0ED;
-            --color-dorado: #C5A059;
-            --color-negro: #000000;
-            --color-blanco: #FFFFFF;
-        }
-
-        body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: var(--color-nude);
-            color: var(--color-negro);
-            margin: 0;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        h1 {
-     …
-[3:02 p. m., 13/8/2026] Edwin Cabeza: https://ecabezavi-netizen.github.io/carlani-visagismo/
-[3:11 p. m., 13/8/2026] Edwin Cabeza: <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Óptica Carlani - Visagismo & Colorimetría IA</title>
     
     <style>
@@ -47,10 +18,11 @@
             background-color: var(--color-nude);
             color: var(--color-negro);
             margin: 0;
-            padding: 15px;
+            padding: 20px 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            box-sizing: border-box;
         }
 
         h1 {
@@ -59,24 +31,28 @@
             margin: 0;
             letter-spacing: 2px;
             font-size: 24px;
+            text-align: center;
         }
 
         .subtitle {
             font-size: 11px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             text-transform: uppercase;
             letter-spacing: 1px;
+            text-align: center;
         }
 
+        /* Área de Cámara */
         #container {
             position: relative;
             width: 100%;
             max-width: 480px;
-            height: 340px;
+            height: 320px;
             border-radius: 15px;
             overflow: hidden;
             background: #000;
             border: 3px solid var(--color-negro);
+            box-sizing: border-box;
         }
 
         #webcam {
@@ -84,113 +60,22 @@
             height: 100%;
             object-fit: cover;
             transform: scaleX(-1);
+            display: block;
         }
 
         #face-guide {
             position: absolute;
             top: 10%; left: 25%; width: 50%; height: 80%;
-            border: 3px dashed var(--color-dorado);
+            border: 2px dashed var(--color-dorado);
             border-radius: 50%;
             pointer-events: none;
-            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-analizar {
-            margin-top: 15px;
-            background: var(--color-dorado);
-            color: #000;
-            border: none;
-            padding: 14px 25px;
-            border-radius: 25px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            width: 100%;
-            max-width: 480px;
-        }
-
-        #result-container {
-            margin-top: 15px;
-            width: 100%;
-            max-width: 480px;
-            background: var(--color-blanco);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            display: none;
-        }
-
-        #result-header {
-            background-color: var(--color-negro);
-            color: var(--color-blanco);
-            padding: 12px;
-            text-align: center;
-        }
-
-        .badge-result {
-            font-size: 20px;
-            color: var(--color-dorado);
-            font-weight: bold;
-            margin-top: 4px;
-        }
-
-        #result-body {
-            padding: 15px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .section-title {
-            color: var(--color-dorado);
-            font-weight: bold;
-            margin-top: 12px;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            font-size: 12px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 3px;
-        }
-
-        /* Galería de Fotos Reales */
-        .catalog-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .product-card {
-            border: 1px solid #eee;
-            border-radius: 8px;
-            padding: 8px;
-            text-align: center;
-            background: #fafafa;
-        }
-
-        .product-card img {
-            width: 100%;
-            height: 90px;
-            object-fit: contain;
-            border-radius: 4px;
-        }
-
-        .product-card .title {
-            font-size: 11px;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-
-        .product-card .tag {
-            font-size: 10px;
-            color: var(--color-dorado);
-            font-weight: bold;
+            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.35);
         }
 
         #loading-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.9);
             color: #fff;
             display: flex;
             flex-direction: column;
@@ -201,6 +86,103 @@
             padding: 20px;
             box-sizing: border-box;
         }
+
+        /* Botón Principal */
+        .btn-analizar {
+            margin-top: 15px;
+            background: var(--color-dorado);
+            color: #000;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 480px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Resultados */
+        #result-container {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 480px;
+            background: var(--color-blanco);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            display: none;
+            box-sizing: border-box;
+        }
+
+        #result-header {
+            background-color: var(--color-negro);
+            color: var(--color-blanco);
+            padding: 15px;
+            text-align: center;
+        }
+
+        .badge-result {
+            font-size: 22px;
+            color: var(--color-dorado);
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        #result-body {
+            padding: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .section-title {
+            color: var(--color-dorado);
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 12px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 4px;
+        }
+
+        /* Galería */
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .product-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            background: #fafafa;
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 85px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .product-card .title {
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 6px;
+        }
+
+        .product-card .tag {
+            font-size: 11px;
+            color: var(--color-dorado);
+            font-weight: bold;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
@@ -208,23 +190,26 @@
     <h1>ÓPTICA CARLANI</h1>
     <div class="subtitle">Visagismo & Colorimetría IA</div>
 
+    <!-- ÁREA DE LA CÁMARA -->
     <div id="container">
         <video id="webcam" autoplay playsinline muted></video>
         <div id="face-guide"></div>
         
         <div id="loading-overlay">
             <h3 style="color: var(--color-dorado); margin: 0 0 10px 0;">ÓPTICA CARLANI</h3>
-            <div id="status-text">Solicitando acceso a la cámara...</div>
+            <div id="status-text">Iniciando cámara...</div>
         </div>
     </div>
 
+    <!-- BOTÓN DE ACCIÓN -->
     <button class="btn-analizar" onclick="analizarRostroYColor()">✨ DIAGNOSTICAR VISAGISMO & COLOR</button>
 
+    <!-- ÁREA DE RESULTADOS (Oculta hasta hacer clic) -->
     <div id="result-container">
         <div id="result-header">
-            <div style="font-size: 11px; letter-spacing: 1px;">DIAGNOSTICO CARLANI</div>
+            <div style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">Diagnóstico Carlani</div>
             <div id="face-shape" class="badge-result">---</div>
-            <div id="skin-tone" style="font-size: 13px; color: #fff; margin-top: 3px;">---</div>
+            <div id="skin-tone" style="font-size: 13px; color: #fff; margin-top: 4px;">---</div>
         </div>
         
         <div id="result-body">
@@ -233,7 +218,7 @@
 
             <div class="section-title">👓 Monturas Ideales en Catálogo</div>
             <div id="catalog-container" class="catalog-grid">
-                <!-- Se llena dinámicamente con las fotos -->
+                <!-- Fotos cargadas automáticamente -->
             </div>
         </div>
     </div>
@@ -247,12 +232,12 @@
         const catalogContainer = document.getElementById('catalog-container');
         const loadingOverlay = document.getElementById('loading-overlay');
 
-        // Base de datos de diagnósticos y modelos recomendados
+        // Catálogo de muestras
         const recomendaciones = [
             {
                 shape: "ROSTRO OVALADO",
                 tone: "Piel Cálida / Dorada",
-                colors: "<b>Recomendados:</b> Carey, Dorado, Marrón Nude, Verde Oliva.",
+                colors: "<b>Colores idóneos:</b> Carey, Dorado, Marrón Nude y Verde Oliva.",
                 products: [
                     { name: "Vogue Elegance", style: "Carey / Dorado", img: "https://images.unsplash.com/photo-1591076482161-42ce6da69f67?w=300&auto=format&fit=crop" },
                     { name: "Carlani Wayfarer", style: "Negro Mate / Dorado", img: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300&auto=format&fit=crop" }
@@ -260,8 +245,8 @@
             },
             {
                 shape: "ROSTRO REDONDO",
-                tone: "Piel Fría / Neutra",
-                colors: "<b>Recomendados:</b> Negro Azabache, Plata, Cristal Transparente, Azul.",
+                tone: "Piel Fría / Clara",
+                colors: "<b>Colores idóneos:</b> Negro Azabache, Plata, Cristal Transparente y Azul.",
                 products: [
                     { name: "Cat-Eye Vogue", style: "Negro Angular", img: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=300&auto=format&fit=crop" },
                     { name: "Hexagonal Premium", style: "Metálico Plata", img: "https://images.unsplash.com/photo-1577803645773-f96470509666?w=300&auto=format&fit=crop" }
@@ -269,8 +254,8 @@
             },
             {
                 shape: "ROSTRO CUADRADO",
-                tone: "Piel Neutra / Cálida",
-                colors: "<b>Recomendados:</b> Nude Suave, Dorado, Rosa Claro, Carey Marrón.",
+                tone: "Piel Neutra / Calida",
+                colors: "<b>Colores idóneos:</b> Nude Suave, Dorado, Rosa Claro y Carey.",
                 products: [
                     { name: "Aviador Doble Puente", style: "Dorado Satinado", img: "https://images.unsplash.com/photo-1508296695146-257a814070b4?w=300&auto=format&fit=crop" },
                     { name: "Oval Acetato", style: "Nude Transparente", img: "https://images.unsplash.com/photo-1509695507497-903c140c43b0?w=300&auto=format&fit=crop" }
@@ -284,10 +269,10 @@
                     video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } } 
                 });
                 videoElement.srcObject = stream;
-                loadingOverlay.style.display = 'none';
+                loadingOverlay.style.display = 'none'; // Ocultar velo de carga
             } catch (err) {
                 console.error(err);
-                document.getElementById('status-text').innerHTML = "⚠️ Activa los permisos de la cámara y recarga.";
+                document.getElementById('status-text').innerHTML = "⚠️ Permite el acceso a la cámara y recarga la página.";
             }
         }
 
@@ -296,7 +281,6 @@
             faceShapeText.innerText = "Analizando...";
             skinToneText.innerText = "Leyendo tono de piel...";
 
-            // Desplazamiento suave hasta los resultados
             setTimeout(() => {
                 const data = recomendaciones[Math.floor(Math.random() * recomendaciones.length)];
 
@@ -304,7 +288,6 @@
                 skinToneText.innerText = Tono: ${data.tone};
                 colorRecoText.innerHTML = data.colors;
 
-                // Cargar productos recomendados con foto
                 catalogContainer.innerHTML = data.products.map(p => `
                     <div class="product-card">
                         <img src="${p.img}" alt="${p.name}">
@@ -314,7 +297,7 @@
                 `).join('');
 
                 resultContainer.scrollIntoView({ behavior: 'smooth' });
-            }, 700);
+            }, 600);
         }
 
         window.onload = initCamera;
