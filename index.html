@@ -112,6 +112,32 @@
             letter-spacing: 0.5px;
         }
 
+        /* Ajuste Asistido Manual (Modo Asesor) */
+        .override-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #333;
+        }
+
+        .btn-override {
+            background: #222;
+            color: #ccc;
+            border: 1px solid #444;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .btn-override:hover {
+            border-color: var(--color-dorado);
+            color: var(--color-dorado);
+        }
+
         /* Resultados */
         #result-container {
             margin-top: 20px;
@@ -222,6 +248,16 @@
             <div style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">Diagnóstico Personalizado Carlani</div>
             <div id="face-shape" class="badge-result">Escaneando...</div>
             <div id="skin-tone" style="font-size: 13px; color: #fff; margin-top: 4px;">---</div>
+
+            <!-- Panel de Calibración Rápida para el Asesor -->
+            <div class="override-panel">
+                <span style="width:100%; font-size:9px; color:#888; margin-bottom:2px;">Ajustar forma manualmente:</span>
+                <button class="btn-override" onclick="forzarForma('OVALADA')">Ovalada</button>
+                <button class="btn-override" onclick="forzarForma('REDONDA')">Redonda</button>
+                <button class="btn-override" onclick="forzarForma('CUADRADA')">Cuadrada</button>
+                <button class="btn-override" onclick="forzarForma('CORAZÓN')">Corazón</button>
+                <button class="btn-override" onclick="forzarForma('DIAMANTE')">Diamante</button>
+            </div>
         </div>
         
         <div id="result-body">
@@ -252,7 +288,7 @@
             document.getElementById('btn-mujer').classList.toggle('active', gender === 'mujer');
         }
 
-        // VECTORES SVG VECTORIALES EXACTOS A TU GUÍA VISUAL
+        // VECTORES SVG VECTORIALES EXACTOS
         const SVG_DESIGNS = {
             agatadas: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><path d="M15 15 Q55 25 75 45 Q45 65 20 50 Z" stroke="#111" stroke-width="5" fill="none"/><path d="M185 15 Q145 25 125 45 Q155 65 180 50 Z" stroke="#111" stroke-width="5" fill="none"/><line x1="75" y1="35" x2="125" y2="35" stroke="#111" stroke-width="4"/></svg>`,
             redondas: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="40" r="25" stroke="#C5A059" stroke-width="4" fill="none"/><circle cx="150" cy="40" r="25" stroke="#C5A059" stroke-width="4" fill="none"/><line x1="75" y1="40" x2="125" y2="40" stroke="#C5A059" stroke-width="3"/></svg>`,
@@ -263,7 +299,7 @@
             ovaladas: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="40" rx="30" ry="20" stroke="#C5A059" stroke-width="4" fill="none"/><ellipse cx="150" cy="40" rx="30" ry="20" stroke="#C5A059" stroke-width="4" fill="none"/><line x1="80" y1="40" x2="120" y2="40" stroke="#C5A059" stroke-width="3"/></svg>`
         };
 
-        // ESTRUCTURA TAL CUAL TU GUÍA FOTOGRÁFICA
+        // ESTRUCTURA FOTOGRÁFICA
         const GUIA_VISAGISMO = {
             "OVALADA": {
                 desc: "Equilibrio armónico natural. Admite gran variedad de formas de armazón.",
@@ -419,7 +455,7 @@
 
         camera.start();
 
-        // ALGORITMO DE DETECCIÓN EXACTO BASADO EN TU GUÍA FOTOGRÁFICA
+        // ALGORITMO RECALIBRADO CON UMBRALES EQUILIBRADOS
         function calcularFormaGuiadaIA() {
             if (!currentLandmarks) return "OVALADA";
 
@@ -441,29 +477,47 @@
             const ratioMandibulaPomulos = anchoMandibula / anchoPomulos;
             const ratioMentonFrente = anchoMandibula / anchoFrente;
 
-            // REGISTRO DE CLASIFICACIÓN RIGUROSO:
-            // 1. CARA EN FORMA DE DIAMANTE: Pómulos marcadamente más anchos que la frente y el mentón
-            if (anchoPomulos > anchoFrente * 1.15 && ratioMandibulaPomulos < 0.75) {
-                return "DIAMANTE";
-            }
-
-            // 2. CARA EN FORMA DE CORAZÓN: Frente amplia y mentón marcadamente afilado
-            if (ratioMentonFrente < 0.73 && ratioMandibulaPomulos < 0.77) {
-                return "CORAZÓN";
-            }
-
-            // 3. CARAS CUADRADAS: Mandíbula ancha y angular igual a pómulos
-            if (ratioMandibulaPomulos > 0.86) {
+            // 1. CARA CUADRADA: Mandíbula fuerte e igual a los pómulos
+            if (ratioMandibulaPomulos > 0.85) {
                 return "CUADRADA";
             }
 
-            // 4. CARAS REDONDAS: Proporciones cortas y curvas (Ratio largo/ancho compacto < 1.22)
-            if (ratioLargoAncho < 1.22) {
+            // 2. CARA CORAZÓN: Frente marcadamente ancha y barbilla en punta
+            if (ratioMentonFrente < 0.70 && ratioMandibulaPomulos < 0.75) {
+                return "CORAZÓN";
+            }
+
+            // 3. CARA DIAMANTE: Solo si los pómulos sobresalen de forma MUY extrema respecto a la frente (> 1.28)
+            if (anchoPomulos > anchoFrente * 1.28 && ratioMandibulaPomulos < 0.70) {
+                return "DIAMANTE";
+            }
+
+            // 4. CARA REDONDA: Rostro compacto y redondeado (Ratio largo/ancho < 1.24)
+            if (ratioLargoAncho < 1.24) {
                 return "REDONDA";
             }
 
-            // 5. CARAS OVALADAS: Rostro proporcionalmente alargado (> 1.22) y mentón suave
+            // 5. CARA OVALADA: Proporción estética equilibrada por defecto
             return "OVALADA";
+        }
+
+        function renderizarResultado(shapeResult) {
+            const baseData = GUIA_VISAGISMO[shapeResult];
+            const genderData = selectedGender === 'hombre' ? baseData.hombre : baseData.mujer;
+
+            faceShapeText.innerText = `CARA ${shapeResult}`;
+            skinToneText.innerText = `Tono: ${genderData.tone}`;
+            colorRecoText.innerHTML = `<div>${baseData.desc}</div><div style="margin-top:5px;">${genderData.colors}</div>`;
+
+            catalogContainer.innerHTML = genderData.products.map(p => `
+                <div class="product-card">
+                    ${p.svg}
+                    <div class="title">${p.name}</div>
+                    <div class="tag">${p.style}</div>
+                </div>
+            `).join('');
+
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
         }
 
         function ejecutarAnalisisIA() {
@@ -477,23 +531,12 @@
 
             setTimeout(() => {
                 const shapeResult = calcularFormaGuiadaIA();
-                const baseData = GUIA_VISAGISMO[shapeResult];
-                const genderData = selectedGender === 'hombre' ? baseData.hombre : baseData.mujer;
-
-                faceShapeText.innerText = `CARA ${shapeResult}`;
-                skinToneText.innerText = `Tono: ${genderData.tone}`;
-                colorRecoText.innerHTML = `<div>${baseData.desc}</div><div style="margin-top:5px;">${genderData.colors}</div>`;
-
-                catalogContainer.innerHTML = genderData.products.map(p => `
-                    <div class="product-card">
-                        ${p.svg}
-                        <div class="title">${p.name}</div>
-                        <div class="tag">${p.style}</div>
-                    </div>
-                `).join('');
-
-                resultContainer.scrollIntoView({ behavior: 'smooth' });
+                renderizarResultado(shapeResult);
             }, 400);
+        }
+
+        function forzarForma(forma) {
+            renderizarResultado(forma);
         }
     </script>
 </body>
