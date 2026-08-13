@@ -42,6 +42,7 @@
             text-align: center;
         }
 
+        /* Contenedor de la cámara limpio */
         #container {
             position: relative;
             width: 100%;
@@ -49,7 +50,7 @@
             height: 320px;
             border-radius: 15px;
             overflow: hidden;
-            background: #000;
+            background: #111;
             border: 3px solid var(--color-negro);
             box-sizing: border-box;
         }
@@ -68,24 +69,10 @@
             border: 2px dashed var(--color-dorado);
             border-radius: 50%;
             pointer-events: none;
-            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.3);
         }
 
-        #loading-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            text-align: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
+        /* Botón de acción dorado */
         .btn-analizar {
             margin-top: 15px;
             background: var(--color-dorado);
@@ -102,6 +89,7 @@
             letter-spacing: 0.5px;
         }
 
+        /* Resultados */
         #result-container {
             margin-top: 20px;
             width: 100%;
@@ -179,17 +167,6 @@
             font-weight: bold;
             margin-top: 2px;
         }
-
-        .btn-retry-cam {
-            background: var(--color-dorado);
-            color: #000;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-weight: bold;
-            margin-top: 10px;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -197,19 +174,16 @@
     <h1>ÓPTICA CARLANI</h1>
     <div class="subtitle">Visagismo & Colorimetría IA</div>
 
+    <!-- ÁREA DE CÁMARA (Limpia) -->
     <div id="container">
         <video id="webcam" autoplay playsinline muted></video>
         <div id="face-guide"></div>
-        
-        <div id="loading-overlay">
-            <h3 style="color: var(--color-dorado); margin: 0 0 10px 0;">ÓPTICA CARLANI</h3>
-            <div id="status-text">Iniciando cámara...</div>
-            <button class="btn-retry-cam" onclick="initCamera()">Encender Cámara</button>
-        </div>
     </div>
 
+    <!-- BOTÓN DE DIAGNÓSTICO -->
     <button class="btn-analizar" onclick="analizarRostroYColor()">✨ DIAGNOSTICAR VISAGISMO & COLOR</button>
 
+    <!-- ÁREA DE RESULTADOS -->
     <div id="result-container">
         <div id="result-header">
             <div style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">Diagnóstico Carlani</div>
@@ -233,7 +207,6 @@
         const skinToneText = document.getElementById('skin-tone');
         const colorRecoText = document.getElementById('color-reco-text');
         const catalogContainer = document.getElementById('catalog-container');
-        const loadingOverlay = document.getElementById('loading-overlay');
 
         const recomendaciones = [
             {
@@ -265,31 +238,25 @@
             }
         ];
 
-        async function initCamera() {
+        // Función directa para activar la cámara sin capas ni restricciones
+        async function startWebcam() {
             try {
-                document.getElementById('status-text').innerText = "Conectando sensor...";
                 const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } } 
+                    video: { facingMode: "user" } 
                 });
                 videoElement.srcObject = stream;
-                
-                // Forzamos la reproducción explícita
-                await videoElement.play();
-                
-                // Ocultamos el cuadro negro de inmediato
-                loadingOverlay.style.display = 'none';
+                videoElement.play();
             } catch (err) {
-                console.error(err);
-                document.getElementById('status-text').innerHTML = "⚠️ Presiona 'Encender Cámara' o permite el acceso arriba en el candado 🔒.";
+                console.error("Error al acceder a la cámara: ", err);
             }
         }
 
-        // Si el video empieza a transmitir, ocultar cuadro negro automáticamente
-        videoElement.onloadedmetadata = () => {
-            loadingOverlay.style.display = 'none';
-        };
-
         function analizarRostroYColor() {
+            // Asegurar transmisión de video si aún no ha iniciado
+            if (!videoElement.srcObject) {
+                startWebcam();
+            }
+
             resultContainer.style.display = "block";
             faceShapeText.innerText = "Analizando...";
             skinToneText.innerText = "Leyendo tono de piel...";
@@ -298,7 +265,7 @@
                 const data = recomendaciones[Math.floor(Math.random() * recomendaciones.length)];
 
                 faceShapeText.innerText = data.shape;
-                skinToneText.innerText = Tono: ${data.tone};
+                skinToneText.innerText = `Tono: ${data.tone}`;
                 colorRecoText.innerHTML = data.colors;
 
                 catalogContainer.innerHTML = data.products.map(p => `
@@ -313,7 +280,8 @@
             }, 600);
         }
 
-        window.onload = initCamera;
+        // Ejecutar de inmediato al cargar la página
+        window.onload = startWebcam;
     </script>
 </body>
 </html>
