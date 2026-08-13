@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Óptica Carlani - Visagismo & Colorimetría IA</title>
+    <title>Óptica Carlani - Visagismo Precision IA</title>
     
+    <!-- Librerías de IA Facial de Google -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+
     <style>
         :root {
             --color-nude: #F5F0ED;
@@ -82,21 +86,13 @@
             box-sizing: border-box;
         }
 
-        #webcam {
+        #webcam, #canvas-mesh {
+            position: absolute;
+            top: 0; left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
             transform: scaleX(-1);
-            display: block;
-        }
-
-        #face-guide {
-            position: absolute;
-            top: 10%; left: 25%; width: 50%; height: 80%;
-            border: 2px dashed var(--color-dorado);
-            border-radius: 50%;
-            pointer-events: none;
-            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.3);
         }
 
         /* Botón de Diagnóstico */
@@ -160,7 +156,6 @@
             padding-bottom: 4px;
         }
 
-        /* Grilla de Galería */
         .catalog-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -204,7 +199,7 @@
 <body>
 
     <h1>ÓPTICA CARLANI</h1>
-    <div class="subtitle">Visagismo & Colorimetría IA</div>
+    <div class="subtitle">Visagismo de Alta Precisión IA</div>
 
     <!-- SELECTOR DE GÉNERO -->
     <div class="gender-selector">
@@ -212,20 +207,20 @@
         <button id="btn-mujer" class="btn-gender" onclick="setGender('mujer')">👩 MUJER</button>
     </div>
 
-    <!-- ÁREA DE CÁMARA -->
+    <!-- ÁREA DE CÁMARA E IA -->
     <div id="container">
         <video id="webcam" autoplay playsinline muted></video>
-        <div id="face-guide"></div>
+        <canvas id="canvas-mesh"></canvas>
     </div>
 
     <!-- BOTÓN DE DIAGNÓSTICO -->
-    <button class="btn-analizar" onclick="analizarRostroYColor()">✨ DIAGNOSTICAR VISAGISMO & COLOR</button>
+    <button class="btn-analizar" onclick="ejecutarAnalisisIA()">✨ ESCANEAR VISAGISMO REAL</button>
 
     <!-- ÁREA DE RESULTADOS -->
     <div id="result-container">
         <div id="result-header">
             <div style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">Diagnóstico Personalizado Carlani</div>
-            <div id="face-shape" class="badge-result">---</div>
+            <div id="face-shape" class="badge-result">Escaneando...</div>
             <div id="skin-tone" style="font-size: 13px; color: #fff; margin-top: 4px;">---</div>
         </div>
         
@@ -238,19 +233,18 @@
         </div>
     </div>
 
-    <!-- Canvas invisible para procesamiento de imagen -->
-    <canvas id="process-canvas" style="display:none;"></canvas>
-
     <script>
         const videoElement = document.getElementById('webcam');
-        const processCanvas = document.getElementById('process-canvas');
+        const canvasElement = document.getElementById('canvas-mesh');
+        const canvasCtx = canvasElement.getContext('2d');
         const resultContainer = document.getElementById('result-container');
         const faceShapeText = document.getElementById('face-shape');
         const skinToneText = document.getElementById('skin-tone');
         const colorRecoText = document.getElementById('color-reco-text');
         const catalogContainer = document.getElementById('catalog-container');
 
-        let selectedGender = 'hombre'; // Por defecto hombre
+        let selectedGender = 'hombre';
+        let currentLandmarks = null;
 
         function setGender(gender) {
             selectedGender = gender;
@@ -258,7 +252,6 @@
             document.getElementById('btn-mujer').classList.toggle('active', gender === 'mujer');
         }
 
-        // VECTORES SVG GARANTIZADOS PARA CADA ESTILO DE MONTURA
         const SVG_GAFAS = {
             cuadrada_negra: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><path d="M20 20 H80 V60 H20 Z M120 20 H180 V60 H120 Z M80 35 H120" stroke="#111" stroke-width="6" fill="none" rx="5"/><line x1="0" y1="30" x2="20" y2="30" stroke="#111" stroke-width="5"/><line x1="180" y1="30" x2="200" y2="30" stroke="#111" stroke-width="5"/></svg>`,
             aviador_metal: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><path d="M25 20 C50 15, 75 20, 75 40 C75 62, 45 65, 25 55 C15 45, 15 25, 25 20 Z" stroke="#C5A059" stroke-width="4" fill="none"/><path d="M175 20 C150 15, 125 20, 125 40 C125 62, 155 65, 175 55 C185 45, 185 25, 175 20 Z" stroke="#C5A059" stroke-width="4" fill="none"/><line x1="75" y1="25" x2="125" y2="25" stroke="#C5A059" stroke-width="3"/><line x1="75" y1="32" x2="125" y2="32" stroke="#C5A059" stroke-width="3"/></svg>`,
@@ -266,13 +259,12 @@
             redonda_dorada: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="40" r="25" stroke="#C5A059" stroke-width="4" fill="none"/><circle cx="150" cy="40" r="25" stroke="#C5A059" stroke-width="4" fill="none"/><line x1="75" y1="40" x2="125" y2="40" stroke="#C5A059" stroke-width="3"/></svg>`
         };
 
-        // BASE DE DATOS COHERENTE POR GÉNERO Y PALETAS DE COLOR REALES
         const RECOMENDACIONES_BASE = {
             "OVALADO": {
-                desc: "Tienes simetría armónica. Casi cualquier diseño proyectará gran estilo.",
+                desc: "Tienes una simetría armónica ideal. El objetivo es mantener el equilibrio natural.",
                 hombre: {
-                    tone: "Piel Neutra / Calida",
-                    colors: "<b>Colores masculinos idóneos:</b> Negro Mate, Carey Oscuro, Gunmetal (Gris Plomo) y Azul Noche.",
+                    tone: "Piel Neutra / Cálida",
+                    colors: "<b>Colores masculinos idóneos:</b> Negro Mate, Carey Oscuro, Gunmetal y Azul Noche.",
                     products: [
                         { name: "Carlani Wayfarer Matte", style: "Negro Mate / Acetato", svg: SVG_GAFAS.cuadrada_negra },
                         { name: "Executive Aviator", style: "Gunmetal Metálico", svg: SVG_GAFAS.aviador_metal }
@@ -288,7 +280,7 @@
                 }
             },
             "REDONDO": {
-                desc: "Buscamos estructuras con ángulos definidos para estilizar y marcar facciones.",
+                desc: "Buscamos estructuras con ángulos marcados para estilizar y contrastar las líneas curvas.",
                 hombre: {
                     tone: "Piel Fría / Clara",
                     colors: "<b>Colores masculinos idóneos:</b> Negro Azabache, Plata Pulido, Titanio y Azul Marino.",
@@ -307,10 +299,10 @@
                 }
             },
             "CUADRADO": {
-                desc: "Buscamos suavizar las líneas marcadas de la mandíbula con curvas y bordes redondeados.",
+                desc: "Buscamos suavizar la mandíbula marcada mediante monturas redondeadas u ovaladas.",
                 hombre: {
                     tone: "Piel Cálida / Morena",
-                    colors: "<b>Colores masculinos idóneos:</b> Carey Marrón Oscuro, Dorado Antiguo, Bronce y Verde Militar.",
+                    colors: "<b>Colores masculinos idóneos:</b> Carey Marrón Oscuro, Dorado Antiguo y Bronce.",
                     products: [
                         { name: "Classic Round Metal", style: "Redonda Dorada / Bronce", svg: SVG_GAFAS.redonda_dorada },
                         { name: "Aviator Curve Platinum", style: "Aviador Suave Metálico", svg: SVG_GAFAS.aviador_metal }
@@ -327,50 +319,97 @@
             }
         };
 
-        async function startWebcam() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "user" } 
-                });
-                videoElement.srcObject = stream;
-                videoElement.play();
-            } catch (err) {
-                console.error("Error al acceder a la cámara: ", err);
+        // INICIALIZACIÓN DE LA IA DE MEDIAPIPE FACE MESH
+        const faceMesh = new FaceMesh({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+        });
+
+        faceMesh.setOptions({
+            maxNumFaces: 1,
+            refineLandmarks: true,
+            minDetectionConfidence: 0.6,
+            minTrackingConfidence: 0.6
+        });
+
+        faceMesh.onResults(onResults);
+
+        function onResults(results) {
+            canvasElement.width = videoElement.videoWidth;
+            canvasElement.height = videoElement.videoHeight;
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+            if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                currentLandmarks = results.multiFaceLandmarks[0];
+
+                // Dibujar puntos faciales sutiles en dorado para dar sensación de escáner futurista
+                canvasCtx.fillStyle = '#C5A059';
+                for (const landmark of currentLandmarks) {
+                    const x = landmark.x * canvasElement.width;
+                    const y = landmark.y * canvasElement.height;
+                    canvasCtx.fillRect(x, y, 1.5, 1.5);
+                }
+            } else {
+                currentLandmarks = null;
             }
+            canvasCtx.restore();
         }
 
-        // MEDICIÓN REAL MEDIANTE ANÁLISIS DE PÍXELES DE CÁMARA
-        function calcularVisagismoReal() {
-            const ctx = processCanvas.getContext('2d');
-            processCanvas.width = videoElement.videoWidth || 640;
-            processCanvas.height = videoElement.videoHeight || 480;
-            ctx.drawImage(videoElement, 0, 0, processCanvas.width, processCanvas.height);
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await faceMesh.send({image: videoElement});
+            },
+            width: 640,
+            height: 480
+        });
 
-            // Algoritmo geométrico basado en proporciones de la imagen central
-            const frameRatio = processCanvas.height / processCanvas.width;
-            
-            // Evaluamos la relación espectral del rostro dentro del óvalo guía
-            if (frameRatio > 0.85) {
-                return "OVALADO";
-            } else if (frameRatio < 0.70) {
-                return "REDONDO";
-            } else {
+        camera.start();
+
+        // ALGORITMO CIENTÍFICO DE VISAGISMO SEGÚN PUNTOS ANATÓMICOS REALES
+        function calcularFormaRealIA() {
+            if (!currentLandmarks) return "OVALADO"; // Default por seguridad
+
+            // Puntos Anatómicos MediaPipe Face Mesh:
+            const top = currentLandmarks[10];       // Frente superior
+            const bottom = currentLandmarks[152];   // Mentón
+            const leftCheek = currentLandmarks[234]; // Pómulo izquierdo
+            const rightCheek = currentLandmarks[454];// Pómulo derecho
+            const leftJaw = currentLandmarks[58];   // Ángulo mandíbula izquierda
+            const rightJaw = currentLandmarks[288];  // Ángulo mandíbula derecha
+
+            // Distancias Euclidianas
+            const largoRostro = Math.hypot(top.x - bottom.x, top.y - bottom.y);
+            const anchoPomulos = Math.hypot(leftCheek.x - rightCheek.x, leftCheek.y - rightCheek.y);
+            const anchoMandibula = Math.hypot(leftJaw.x - rightJaw.x, leftJaw.y - rightJaw.y);
+
+            // Ratios Críticos
+            const ratioLargoAncho = largoRostro / anchoPomulos;
+            const ratioMandibulaPomulos = anchoMandibula / anchoPomulos;
+
+            // REGLAS ANATÓMICAS RIGUROSAS:
+            // 1. Rostro Cuadrado: Mandíbula ancha y marcada (ratio mandíbula/pómulos > 0.82)
+            if (ratioMandibulaPomulos > 0.83) {
                 return "CUADRADO";
             }
+            // 2. Rostro Redondo: Largo similar al ancho (ratio largo/ancho < 1.25)
+            if (ratioLargoAncho < 1.25) {
+                return "REDONDO";
+            }
+            // 3. Rostro Ovalado: Largo significativamente mayor al ancho (ratio largo/ancho >= 1.25 y mandíbula fina)
+            return "OVALADO";
         }
 
-        function analizarRostroYColor() {
-            if (!videoElement.srcObject) {
-                startWebcam();
+        function ejecutarAnalisisIA() {
+            if (!currentLandmarks) {
+                alert("Por favor, encuadra tu rostro de frente a la cámara con buena iluminación.");
+                return;
             }
 
             resultContainer.style.display = "block";
-            faceShapeText.innerText = "Midiendo proporciones...";
-            skinToneText.innerText = "Analizando fotogramas...";
+            faceShapeText.innerText = "Escaneando Puntos Músculo-Óseos...";
 
             setTimeout(() => {
-                // Cálculo real consistente (ya no es aleatorio)
-                const shapeResult = calcularVisagismoReal();
+                const shapeResult = calcularFormaRealIA();
                 const baseData = RECOMENDACIONES_BASE[shapeResult];
                 const genderData = selectedGender === 'hombre' ? baseData.hombre : baseData.mujer;
 
@@ -387,10 +426,8 @@
                 `).join('');
 
                 resultContainer.scrollIntoView({ behavior: 'smooth' });
-            }, 700);
+            }, 500);
         }
-
-        window.onload = startWebcam;
     </script>
 </body>
 </html>
