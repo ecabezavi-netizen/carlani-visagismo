@@ -42,7 +42,6 @@
             text-align: center;
         }
 
-        /* Área de Cámara */
         #container {
             position: relative;
             width: 100%;
@@ -87,7 +86,6 @@
             box-sizing: border-box;
         }
 
-        /* Botón Principal */
         .btn-analizar {
             margin-top: 15px;
             background: var(--color-dorado);
@@ -104,7 +102,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Resultados */
         #result-container {
             margin-top: 20px;
             width: 100%;
@@ -148,7 +145,6 @@
             padding-bottom: 4px;
         }
 
-        /* Galería */
         .catalog-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -183,6 +179,17 @@
             font-weight: bold;
             margin-top: 2px;
         }
+
+        .btn-retry-cam {
+            background: var(--color-dorado);
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 10px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -190,7 +197,6 @@
     <h1>ÓPTICA CARLANI</h1>
     <div class="subtitle">Visagismo & Colorimetría IA</div>
 
-    <!-- ÁREA DE LA CÁMARA -->
     <div id="container">
         <video id="webcam" autoplay playsinline muted></video>
         <div id="face-guide"></div>
@@ -198,13 +204,12 @@
         <div id="loading-overlay">
             <h3 style="color: var(--color-dorado); margin: 0 0 10px 0;">ÓPTICA CARLANI</h3>
             <div id="status-text">Iniciando cámara...</div>
+            <button class="btn-retry-cam" onclick="initCamera()">Encender Cámara</button>
         </div>
     </div>
 
-    <!-- BOTÓN DE ACCIÓN -->
     <button class="btn-analizar" onclick="analizarRostroYColor()">✨ DIAGNOSTICAR VISAGISMO & COLOR</button>
 
-    <!-- ÁREA DE RESULTADOS (Oculta hasta hacer clic) -->
     <div id="result-container">
         <div id="result-header">
             <div style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">Diagnóstico Carlani</div>
@@ -217,9 +222,7 @@
             <div id="color-reco-text">---</div>
 
             <div class="section-title">👓 Monturas Ideales en Catálogo</div>
-            <div id="catalog-container" class="catalog-grid">
-                <!-- Fotos cargadas automáticamente -->
-            </div>
+            <div id="catalog-container" class="catalog-grid"></div>
         </div>
     </div>
 
@@ -232,7 +235,6 @@
         const catalogContainer = document.getElementById('catalog-container');
         const loadingOverlay = document.getElementById('loading-overlay');
 
-        // Catálogo de muestras
         const recomendaciones = [
             {
                 shape: "ROSTRO OVALADO",
@@ -265,16 +267,27 @@
 
         async function initCamera() {
             try {
+                document.getElementById('status-text').innerText = "Conectando sensor...";
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } } 
                 });
                 videoElement.srcObject = stream;
-                loadingOverlay.style.display = 'none'; // Ocultar velo de carga
+                
+                // Forzamos la reproducción explícita
+                await videoElement.play();
+                
+                // Ocultamos el cuadro negro de inmediato
+                loadingOverlay.style.display = 'none';
             } catch (err) {
                 console.error(err);
-                document.getElementById('status-text').innerHTML = "⚠️ Permite el acceso a la cámara y recarga la página.";
+                document.getElementById('status-text').innerHTML = "⚠️ Presiona 'Encender Cámara' o permite el acceso arriba en el candado 🔒.";
             }
         }
+
+        // Si el video empieza a transmitir, ocultar cuadro negro automáticamente
+        videoElement.onloadedmetadata = () => {
+            loadingOverlay.style.display = 'none';
+        };
 
         function analizarRostroYColor() {
             resultContainer.style.display = "block";
