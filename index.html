@@ -1,9 +1,38 @@
-<!DOCTYPE html>
+[2:59 p. m., 13/8/2026] Edwin Cabeza: <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Óptica Carlani - Visagismo IA</title>
+    
+    <style>
+        :root {
+            --color-nude: #F5F0ED;
+            --color-dorado: #C5A059;
+            --color-negro: #000000;
+            --color-blanco: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--color-nude);
+            color: var(--color-negro);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+     …
+[3:02 p. m., 13/8/2026] Edwin Cabeza: https://ecabezavi-netizen.github.io/carlani-visagismo/
+[3:11 p. m., 13/8/2026] Edwin Cabeza: <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Óptica Carlani - Visagismo & Colorimetría IA</title>
     
     <style>
         :root {
@@ -33,7 +62,7 @@
         }
 
         .subtitle {
-            font-size: 12px;
+            font-size: 11px;
             margin-bottom: 15px;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -43,7 +72,7 @@
             position: relative;
             width: 100%;
             max-width: 480px;
-            height: 360px;
+            height: 340px;
             border-radius: 15px;
             overflow: hidden;
             background: #000;
@@ -66,6 +95,21 @@
             box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.3);
         }
 
+        .btn-analizar {
+            margin-top: 15px;
+            background: var(--color-dorado);
+            color: #000;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 480px;
+        }
+
         #result-container {
             margin-top: 15px;
             width: 100%;
@@ -74,6 +118,7 @@
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: none;
         }
 
         #result-header {
@@ -81,12 +126,10 @@
             color: var(--color-blanco);
             padding: 12px;
             text-align: center;
-            font-size: 12px;
-            letter-spacing: 1px;
         }
 
-        #face-shape {
-            font-size: 24px;
+        .badge-result {
+            font-size: 20px;
             color: var(--color-dorado);
             font-weight: bold;
             margin-top: 4px;
@@ -98,30 +141,50 @@
             line-height: 1.5;
         }
 
-        .reco-title {
+        .section-title {
             color: var(--color-dorado);
             font-weight: bold;
-            margin-top: 10px;
-            margin-bottom: 5px;
+            margin-top: 12px;
+            margin-bottom: 6px;
             text-transform: uppercase;
-            font-size: 13px;
+            font-size: 12px;
             border-bottom: 1px solid #eee;
             padding-bottom: 3px;
         }
 
-        .btn-analizar {
-            margin-top: 15px;
-            background: var(--color-dorado);
-            color: #000;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        /* Galería de Fotos Reales */
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .product-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            background: #fafafa;
+        }
+
+        .product-card img {
             width: 100%;
-            max-width: 480px;
+            height: 90px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .product-card .title {
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .product-card .tag {
+            font-size: 10px;
+            color: var(--color-dorado);
+            font-weight: bold;
         }
 
         #loading-overlay {
@@ -143,7 +206,7 @@
 <body>
 
     <h1>ÓPTICA CARLANI</h1>
-    <div class="subtitle">Visagismo e Inteligencia Artificial</div>
+    <div class="subtitle">Visagismo & Colorimetría IA</div>
 
     <div id="container">
         <video id="webcam" autoplay playsinline muted></video>
@@ -155,44 +218,63 @@
         </div>
     </div>
 
-    <button class="btn-analizar" onclick="analizarRostro()">✨ DIAGNOSTICAR VISAGISMO</button>
+    <button class="btn-analizar" onclick="analizarRostroYColor()">✨ DIAGNOSTICAR VISAGISMO & COLOR</button>
 
     <div id="result-container">
         <div id="result-header">
-            <div>TU TIPO DE ROSTRO ES:</div>
-            <div id="face-shape">Esperando lectura...</div>
+            <div style="font-size: 11px; letter-spacing: 1px;">DIAGNOSTICO CARLANI</div>
+            <div id="face-shape" class="badge-result">---</div>
+            <div id="skin-tone" style="font-size: 13px; color: #fff; margin-top: 3px;">---</div>
         </div>
+        
         <div id="result-body">
-            <div id="face-result-text">
-                Encuadra tu rostro dentro del óvalo guía dorada y presiona el botón <b>DIAGNOSTICAR VISAGISMO</b>.
+            <div class="section-title">🎨 Paleta de Colores Recomendada</div>
+            <div id="color-reco-text">---</div>
+
+            <div class="section-title">👓 Monturas Ideales en Catálogo</div>
+            <div id="catalog-container" class="catalog-grid">
+                <!-- Se llena dinámicamente con las fotos -->
             </div>
         </div>
     </div>
 
     <script>
         const videoElement = document.getElementById('webcam');
+        const resultContainer = document.getElementById('result-container');
         const faceShapeText = document.getElementById('face-shape');
-        const faceResultTextBlock = document.getElementById('face-result-text');
+        const skinToneText = document.getElementById('skin-tone');
+        const colorRecoText = document.getElementById('color-reco-text');
+        const catalogContainer = document.getElementById('catalog-container');
         const loadingOverlay = document.getElementById('loading-overlay');
 
+        // Base de datos de diagnósticos y modelos recomendados
         const recomendaciones = [
             {
-                shape: "OVALADO",
-                desc: "Tienes una simetría natural perfecta. ¡Casi todo te favorece!",
-                hombre: "✔️ Cuadradas o Rectangulares para dar estructura.<br>✔️ Aviador metálicas (doble puente).",
-                mujer: "✔️ Cat-Eye para elevar la mirada.<br>✔️ Geométricas / Hexagonales."
+                shape: "ROSTRO OVALADO",
+                tone: "Piel Cálida / Dorada",
+                colors: "<b>Recomendados:</b> Carey, Dorado, Marrón Nude, Verde Oliva.",
+                products: [
+                    { name: "Vogue Elegance", style: "Carey / Dorado", img: "https://images.unsplash.com/photo-1591076482161-42ce6da69f67?w=300&auto=format&fit=crop" },
+                    { name: "Carlani Wayfarer", style: "Negro Mate / Dorado", img: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300&auto=format&fit=crop" }
+                ]
             },
             {
-                shape: "REDONDO",
-                desc: "Buscamos ángulos definidos para estilizar y alargar el rostro.",
-                hombre: "✔️ Cuadradas marcadas o Wayfarer.<br>✔️ Rectangulares de acetato.",
-                mujer: "✔️ Cat-Eye angular.<br>✔️ Marcos angulares y rectangulares."
+                shape: "ROSTRO REDONDO",
+                tone: "Piel Fría / Neutra",
+                colors: "<b>Recomendados:</b> Negro Azabache, Plata, Cristal Transparente, Azul.",
+                products: [
+                    { name: "Cat-Eye Vogue", style: "Negro Angular", img: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=300&auto=format&fit=crop" },
+                    { name: "Hexagonal Premium", style: "Metálico Plata", img: "https://images.unsplash.com/photo-1577803645773-f96470509666?w=300&auto=format&fit=crop" }
+                ]
             },
             {
-                shape: "CUADRADO / CORAZÓN",
-                desc: "Buscamos suavizar líneas fuertes y equilibrar facciones.",
-                hombre: "✔️ Redondas u Ovaladas.<br>✔️ Aviador clásicas metálicas.",
-                mujer: "✔️ Redondas de acetato nude o metal.<br>✔️ Estilos mariposa o curvas suaves."
+                shape: "ROSTRO CUADRADO",
+                tone: "Piel Neutra / Cálida",
+                colors: "<b>Recomendados:</b> Nude Suave, Dorado, Rosa Claro, Carey Marrón.",
+                products: [
+                    { name: "Aviador Doble Puente", style: "Dorado Satinado", img: "https://images.unsplash.com/photo-1508296695146-257a814070b4?w=300&auto=format&fit=crop" },
+                    { name: "Oval Acetato", style: "Nude Transparente", img: "https://images.unsplash.com/photo-1509695507497-903c140c43b0?w=300&auto=format&fit=crop" }
+                ]
             }
         ];
 
@@ -205,26 +287,34 @@
                 loadingOverlay.style.display = 'none';
             } catch (err) {
                 console.error(err);
-                document.getElementById('status-text').innerHTML = "⚠️ Activa los permisos de la cámara en el navegador y recarga la página.";
+                document.getElementById('status-text').innerHTML = "⚠️ Activa los permisos de la cámara y recarga.";
             }
         }
 
-        function analizarRostro() {
+        function analizarRostroYColor() {
+            resultContainer.style.display = "block";
             faceShapeText.innerText = "Analizando...";
-            
+            skinToneText.innerText = "Leyendo tono de piel...";
+
+            // Desplazamiento suave hasta los resultados
             setTimeout(() => {
-                const randomIndex = Math.floor(Math.random() * recomendaciones.length);
-                const data = recomendaciones[randomIndex];
+                const data = recomendaciones[Math.floor(Math.random() * recomendaciones.length)];
 
                 faceShapeText.innerText = data.shape;
-                faceResultTextBlock.innerHTML = `
-                    <p style="margin:0 0 10px 0;">${data.desc}</p>
-                    <div class="reco-title">Recomendación Hombre:</div>
-                    <div>${data.hombre}</div>
-                    <div class="reco-title">Recomendación Mujer:</div>
-                    <div>${data.mujer}</div>
-                `;
-            }, 600);
+                skinToneText.innerText = Tono: ${data.tone};
+                colorRecoText.innerHTML = data.colors;
+
+                // Cargar productos recomendados con foto
+                catalogContainer.innerHTML = data.products.map(p => `
+                    <div class="product-card">
+                        <img src="${p.img}" alt="${p.name}">
+                        <div class="title">${p.name}</div>
+                        <div class="tag">${p.style}</div>
+                    </div>
+                `).join('');
+
+                resultContainer.scrollIntoView({ behavior: 'smooth' });
+            }, 700);
         }
 
         window.onload = initCamera;
